@@ -1,0 +1,44 @@
+======================================================================
+SahayakAI — Synthetic Dataset Summary (UPGRADED)
+Generated: 2026-03-28 22:54:33
+======================================================================
+Total students           : 500
+At-risk (1)              : 150
+Safe (0)                 : 350
+Dropout rate             : 30.0%
+Temporal window          : 12 weeks
+Time series rows         : 6000
+
+Stress Type Breakdown (at-risk students):
+  home_financial_stress         : 81
+  academic_struggle             : 69
+
+Intervention Coverage (at-risk students):
+  Received intervention   : 93 (62.0%)
+  Avg effectiveness      : 0.31
+
+Signal Means — At-Risk vs Safe:
+  Signal                                      At-Risk       Safe
+  --------------------------------------------------------------
+  response_time_decay_hrs                       48.35       6.14
+  forum_passive_active_ratio                    42.38       5.97
+  login_fragmentation_score                      0.74       0.20
+  resource_depth_shift                           0.81       0.20
+  collaborative_tool_drift_days                 18.08       3.00
+  question_quality_level                         1.92       3.97
+  peer_centrality_score                          0.19       0.63
+  optional_activity_rate                         0.11       0.72
+  submission_rush_hrs                            1.64      22.47
+  silence_burst_count                            3.44       0.50
+  help_seeking_latency_days                     11.65       1.41
+  feedback_response_rate                         0.16       0.85
+
+India-Specific Signal Rates (at-risk vs safe):
+  device_count                            : 1.30 (at-risk) | 1.56 (safe)
+  monday_absence_cluster                  : 0.76 (at-risk) | 0.12 (safe)
+  tired_keyword_freq                      : 4.15 (at-risk) | 0.81 (safe)
+  whatsapp_study_silence                  : 0.81 (at-risk) | 0.17 (safe)
+
+Early Warning Labels (Week 4 Snapshot):
+  Students predicted to drop out soon at week 4: 0
+  (These are the students teachers should prioritize)
