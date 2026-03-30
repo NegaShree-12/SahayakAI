@@ -1,0 +1,35 @@
+SahayakAI — Model Training Report
+===================================
+Tech Z Ideathon 2026
+
+DATASET
+  Students   : 500
+  Features   : 43
+  At-risk    : 150 (30.0%)
+
+MODEL
+  Type       : XGBoost
+  Resampling : SMOTEENN
+
+EVALUATION (threshold=0.50)
+  Precision  : 1.000
+  Recall     : 0.933
+  F1-Score   : 0.966
+  F2-Score   : 0.946  ← PRIMARY METRIC
+  AUC-ROC    : 1.000
+  TP=28  FP=0  FN=2  TN=70
+
+4-TIER THRESHOLD RESULTS
+  Tier 1 — Immediate Visit         thresh=0.75  P=1.00  R=0.93  F2=0.95  flagged=28
+  Tier 2 — Digital Check-In        thresh=0.5  P=1.00  R=0.93  F2=0.95  flagged=28
+  Tier 3 — Watch List              thresh=0.3  P=1.00  R=0.93  F2=0.95  flagged=28
+  Tier 4 — Baseline Monitor        thresh=0.2  P=1.00  R=0.93  F2=0.95  flagged=28
+
+TOP 5 FEATURES
+  1. response_time_decay_hrs                   : 0.9896
+  2. forum_passive_active_ratio                : 0.0104
+  3. login_fragmentation_score                 : 0.0000
+  4. resource_depth_shift                      : 0.0000
+  5. collaborative_tool_drift_days             : 0.0000
+
+Co-designed with ASI-1 (asi1.ai) | Tech Z Ideathon 2026
