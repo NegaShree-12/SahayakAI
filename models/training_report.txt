@@ -1,6 +1,6 @@
-SahayakAI — Model Training Report
-===================================
-Tech Z Ideathon 2026
+SahayakAI — Model Training Report (FINAL WITH CALIBRATION)
+==============================================================
+Tech Z Ideathon 2026 | The Silence Before the Drop
 
 DATASET
   Students   : 500
@@ -10,13 +10,18 @@ DATASET
 MODEL
   Type       : XGBoost
   Resampling : SMOTEENN
+  Calibration improved Brier Score by -2.9%
 
-EVALUATION (threshold=0.50)
-  Precision  : 1.000
-  Recall     : 0.933
-  F1-Score   : 0.966
-  F2-Score   : 0.946  ← PRIMARY METRIC
-  AUC-ROC    : 1.000
+MODEL STABILITY
+  CV Stability: STABLE
+  CV F2-Score: 0.997 ± 0.006
+
+EVALUATION (Calibrated Model, threshold=0.50)
+  Precision  : 1.0000
+  Recall     : 0.9333
+  F1-Score   : 0.9655
+  F2-Score   : 0.9459  ← PRIMARY METRIC
+  AUC-ROC    : 1.0000
   TP=28  FP=0  FN=2  TN=70
 
 4-TIER THRESHOLD RESULTS
@@ -26,10 +31,27 @@ EVALUATION (threshold=0.50)
   Tier 4 — Baseline Monitor        thresh=0.2  P=1.00  R=0.93  F2=0.95  flagged=28
 
 TOP 5 FEATURES
-  1. response_time_decay_hrs                   : 0.9896
-  2. forum_passive_active_ratio                : 0.0104
-  3. login_fragmentation_score                 : 0.0000
-  4. resource_depth_shift                      : 0.0000
-  5. collaborative_tool_drift_days             : 0.0000
+  1. optional_activity_rate                    : 0.2963
+  2. resource_depth_shift                      : 0.2472
+  3. response_time_decay_hrs                   : 0.1819
+  4. collaborative_tool_drift_days             : 0.1692
+  5. forum_passive_active_ratio                : 0.1054
+
+OUTPUT FILES GENERATED
+  - models/dropout_model.pkl (uncalibrated)
+  - models/dropout_model_calibrated.pkl (RECOMMENDED FOR PRODUCTION)
+  - models/stress_model.pkl
+  - models/label_encoder.pkl
+  - models/feature_names.pkl
+  - models/inference_helper.py (UPDATED to use calibrated model)
+  - models/cv_results.json
+  - models/plots/feature_importance.png
+  - models/plots/precision_recall_curve.png
+  - models/plots/calibration_curve.png
+  - data/templates/tier2_messages.json
+  - models/training_report.txt
+
+RECOMMENDATION: Use dropout_model_calibrated.pkl in Streamlit dashboard
+for production deployment to ensure reliable probability estimates.
 
 Co-designed with ASI-1 (asi1.ai) | Tech Z Ideathon 2026

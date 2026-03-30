@@ -2,14 +2,9 @@
 
 > **"Every dropout gives 47 warning signals before they leave. No teacher ever saw them. SahayakAI does."**
 
-[![Hackathon](https://img.shields.io/badge/Hackathon-Tech%20Z%20Ideathon%202026-green)](https://devpost.com)
-[![ASI-1](https://img.shields.io/badge/Powered%20by-ASI--1-blue)](https://asi1.ai)
-[![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)]()
-[![Theme](https://img.shields.io/badge/Theme-Education%20%2B%20Social%20Good-orange)]()
 
----
+## Table of Contents
 
-## 📌 Table of Contents
 1. [Project Overview](#1-project-overview)
 2. [Problem Statement](#2-problem-statement)
 3. [Solution Overview](#3-solution-overview)
@@ -21,8 +16,10 @@
 9. [Target Users & Market Size](#9-target-users--market-size)
 10. [Impact & Benefits](#10-impact--benefits)
 11. [Ethics & Privacy](#11-ethics--privacy)
-12. [Team Information](#12-team-information)
-13. [ASI-1 Interaction Log](#13-asi-1-interaction-log)
+12. [Known Limitations & Production Roadmap](#12-known-limitations--production-roadmap)
+13. [Team Information](#13-team-information)
+14. [ASI-1 Interaction Log](#14-asi-1-interaction-log)
+15. [Submission Checklist](#15-submission-checklist)
 
 ---
 
@@ -34,20 +31,23 @@
 |---|---|
 | **Project Name** | SahayakAI — The Silence Before the Drop |
 | **Theme** | Education + Social Good |
-| **Core Technology** | ASI-1 (Behavioural Reasoning Engine) + Python + ML |
+| **Core Technology** | ASI-1 (Behavioural Reasoning Engine) + XGBoost + SMOTEENN |
 | **Target Region** | Rural India (pilot: Tamil Nadu) |
 | **Target Users** | Students aged 12–18, Teachers, School Counsellors |
 | **Hackathon** | Tech Z Ideathon 2026 |
+| **Model F2-Score** | 0.946 (synthetic data) |
+| **CV Stability** | 0.997 ± 0.006 (STABLE) |
+| **ASI-1 Interactions** | 10 documented sessions (Days 1–3) |
 
 ---
 
 ## 2. Problem Statement
 
 ### The Crisis
+
 India loses **1.5 crore (15 million) students every year** to dropout. Not suddenly — but slowly, invisibly, signal by signal.
 
 ### What's Broken Today
-The system only notices a student has dropped out **after they stop coming**. By then, it is too late.
 
 | Current Solution | Why It Fails |
 |---|---|
@@ -57,9 +57,11 @@ The system only notices a student has dropped out **after they stop coming**. By
 | EdTech platforms (Byju's, Khan Academy) | Track learning progress, not dropout risk signals |
 
 ### The Gap
+
 > The space between a student's **last meaningful interaction** and their **official dropout** is where SahayakAI operates.
 
 ### Why First-Generation Learners Are Most at Risk
+
 - No parent at home who understands school systems
 - First signs of struggle = shame + silence, not help-seeking
 - Financial pressure at home competes directly with school time
@@ -136,7 +138,7 @@ Student: {student_name}, Age: {age}
 Silence duration: {silence_days} days
 Emotional language detected: {keywords}
 Attendance pattern: {attendance_pattern}
-Risk classification: {risk_type}  # academic_struggle OR external_stress
+Risk classification: {risk_type}
 
 Generate a teacher-facing alert in plain, simple language.
 Include: what we see, what it might mean, specific action steps.
@@ -151,19 +153,17 @@ Do NOT use jargon. Write as if speaking to a caring teacher.
 **ASI-1 Output:**
 > *"Priya has been quiet for 11 days. She usually asks questions regularly, but she suddenly stopped. She's using the word 'tired' often — not just once, but repeatedly. She's missing classes regularly on Mondays, which is a new pattern. Something has changed for Priya. This is the critical window where support can make the biggest difference. Reach out personally: 'Hi Priya, noticed you've been quiet lately and you seemed tired. Want to have a quick chat about how things are going?'"*
 
-**This is a real output from ASI-1 — generated during Day 1 ideation session.**
-
 ---
 
 ## 5. The 12 Micro-Signals
 
-*Developed with ASI-1 assistance on March 28, 2026. See Section 13 for full interaction log.*
+*Developed with ASI-1 assistance — March 28, 2026*
 
 ### Digital Footprint Patterns
 
 | # | Signal | What It Measures | Dropout Indicator |
 |---|---|---|---|
-| 1 | **Response Time Decay** | Time to reply to messages/emails | Shift from 2hrs → 48hrs response |
+| 1 | **Response Time Decay** | Time to reply to messages/emails | Shift from 2hrs to 48hrs response |
 | 2 | **Forum Passive-Active Ratio** | Views : Posts ratio | Ratio spike from 5:1 to 50:1 |
 | 3 | **Login Pattern Fragmentation** | Temporal consistency of logins | 3AM logins + complete disappearance |
 | 4 | **Resource Access Depth Shift** | Surface vs deep content access | Return to shallow after deep = withdrawal |
@@ -173,18 +173,31 @@ Do NOT use jargon. Write as if speaking to a caring teacher.
 
 | # | Signal | What It Measures | Dropout Indicator |
 |---|---|---|---|
-| 6 | **Question Quality De-escalation** | Bloom's Taxonomy level of questions | "How does X work?" → "Is this on exam?" |
+| 6 | **Question Quality De-escalation** | Bloom's Taxonomy level of questions | "How does X work?" to "Is this on exam?" |
 | 7 | **Peer Interaction Centrality Drop** | How often others mention the student | Fading from peer awareness |
 | 8 | **Optional Activity Abandonment** | Engagement with non-mandatory content | Stops before grades fall (months earlier) |
-| 9 | **Submission Timing Rush Window** | Assignment submission timing | 24hrs early → last 3 minutes consistently |
+| 9 | **Submission Timing Rush Window** | Assignment submission timing | 24hrs early to last 3 minutes consistently |
 
 ### Silence & Withdrawal Indicators
 
 | # | Signal | What It Measures | Dropout Indicator |
 |---|---|---|---|
 | 10 | **Silence Burst Episodes** | 3-7 day absolute zero interaction | Correlates with external life events |
-| 11 | **Help-Seeking Avoidance Gradient** | Time between struggle and asking for help | Immediate → 24hrs → never asking |
-| 12 | **Feedback Response Dampening** | Response to corrective feedback | Revises → submits unchanged → stops |
+| 11 | **Help-Seeking Avoidance Gradient** | Time between struggle and asking for help | Immediate to 24hrs to never asking |
+| 12 | **Feedback Response Dampening** | Response to corrective feedback | Revises to submits unchanged to stops |
+
+### Top 5 Features by Model Importance
+*(From trained XGBoost model — March 30, 2026)*
+
+| Rank | Feature | Importance | Type |
+|---|---|---|---|
+| 1 | optional_activity_rate | 0.2963 | Core Signal |
+| 2 | resource_depth_shift | 0.2472 | Core Signal |
+| 3 | response_time_decay_hrs | 0.1819 | Core Signal |
+| 4 | collaborative_tool_drift_days | 0.1692 | Core Signal |
+| 5 | forum_passive_active_ratio | 0.1054 | Core Signal |
+
+> All top 5 features are ASI-1 co-designed core micro-signals — validating the signal architecture.
 
 ---
 
@@ -209,19 +222,19 @@ The same silence can mean two completely different things. Getting this wrong = 
 
 ```
 STEP 1: Check Temporal Coherence
-    Irregular pattern? → Likely external stress
-    Regular but passive? → Likely academic struggle
+    Irregular pattern?      → Likely external stress
+    Regular but passive?    → Likely academic struggle
 
 STEP 2: Check Performance When Present
-    Degraded quality? → Academic struggle
+    Degraded quality?       → Academic struggle
     Same quality as before? → External stress
 
 STEP 3: Check Social Selectivity
-    Socially withdrawn too? → Academic struggle (shame-driven)
+    Socially withdrawn too?             → Academic struggle (shame-driven)
     Socially active, academically silent? → External stress
 
 STEP 4: Check Resource Access
-    Stable access, declining use? → Academic struggle
+    Stable access, declining use?       → Academic struggle
     Unstable access or reduced devices? → Financial constraint
 ```
 
@@ -239,85 +252,153 @@ STEP 4: Check Resource Access
 ### Technology Stack
 
 ```
-┌─────────────────────────────────────┐
-│           FRONTEND LAYER            │
-│   Streamlit Dashboard (Teacher UI)  │
-│   Risk scores + ASI-1 explanations  │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│           BACKEND LAYER             │
-│   Python + FastAPI                  │
-│   Signal extraction pipeline        │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│           ML LAYER                  │
-│   scikit-learn dropout classifier   │
-│   Trained on 12 behavioural signals │
-│   Outputs: risk score + risk type   │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│           ASI-1 LAYER               │
-│   Reasoning engine                  │
-│   Differential diagnosis            │
-│   Intervention generation           │
-│   Teacher explanation narration     │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           FRONTEND LAYER                │
+│   Streamlit Dashboard (Teacher UI)      │
+│   5-element ASI-1 designed layout       │
+│   Mobile-first, Tamil/English toggle    │
+│   Demo guardrails: banner + prob cap    │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│           INFERENCE LAYER               │
+│   models/inference_helper.py            │
+│   predict_dropout_risk()                │
+│   Calibrated model (isotonic)           │
+│   Probability cap: max 85%              │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│           ML LAYER                      │
+│   XGBoost Dropout Predictor             │
+│   + Isotonic Calibration                │
+│   + SMOTEENN Resampling                 │
+│   + 5-fold CV Stability (0.997±0.006)   │
+│   43 features total:                    │
+│     12 core signals                     │
+│     4 India-specific signals            │
+│     24 temporal lag features            │
+│     3 demographic features              │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│           ASI-1 LAYER                   │
+│   Reasoning + differential diagnosis   │
+│   Intervention generation              │
+│   Teacher explanation narration        │
+│   WhatsApp message templates (5 types) │
+└─────────────────────────────────────────┘
 ```
 
-### Data Flow
+### Repository Structure
 
 ```
-Student Interaction → Signal Extraction → sklearn Risk Score
-                                                    ↓
-                              ASI-1 Differential Diagnosis
-                                                    ↓
-                              ASI-1 Intervention Generation
-                                                    ↓
-                              Teacher Dashboard Alert (Streamlit)
+SahayakAI/
+├── README.md
+├── data/
+│   ├── generate_dataset.py
+│   ├── synthetic/
+│   │   ├── students.csv              (500 students, 26 features)
+│   │   ├── students_timeseries.csv   (12-week, 6000 rows)
+│   │   └── students_info.txt
+│   └── templates/
+│       └── tier2_messages.json       (5 WhatsApp templates)
+├── src/
+│   └── model/
+│       └── train_model.py            (full pipeline)
+├── models/
+│   ├── dropout_model.pkl             (uncalibrated)
+│   ├── dropout_model_calibrated.pkl  (PRODUCTION)
+│   ├── stress_model.pkl
+│   ├── label_encoder.pkl
+│   ├── feature_names.pkl
+│   ├── inference_helper.py
+│   ├── cv_results.json
+│   ├── training_report.txt
+│   └── plots/
+│       ├── feature_importance.png
+│       ├── precision_recall_curve.png
+│       └── calibration_curve.png
+├── docs/
+│   └── asi1_interactions/
+│       ├── day1/   (3 screenshots)
+│       ├── day2/   (3 screenshots)
+│       └── day3/   (4 screenshots)
+└── wireframes/     (coming Day 6)
 ```
+
+### Model Performance
+
+| Metric | Score | Note |
+|---|---|---|
+| **F2-Score** | **0.946** | Primary metric — recall-weighted |
+| Precision | 1.000 | On synthetic data |
+| Recall | 0.933 | Catches 28/30 at-risk students |
+| AUC-ROC | 1.000 | On synthetic data |
+| CV Stability | 0.997 ± 0.006 | STABLE across 5 folds |
+| Brier Score (calibrated) | 0.0152 | Probability reliability |
+
+### 4-Tier Adaptive Threshold System
+
+*(Designed with ASI-1 — Day 2 Session)*
+
+| Tier | Threshold | Action | Precision | Recall |
+|---|---|---|---|---|
+| **Tier 1** | 0.75 | In-person teacher visit + counsellor | 1.000 | 0.933 |
+| **Tier 2** | 0.50 | WhatsApp check-in + peer mentor | 1.000 | 0.933 |
+| **Tier 3** | 0.30 | Passive monitoring, weekly review | 1.000 | 0.933 |
+| **Tier 4** | 0.20 | Data logging only | 1.000 | 0.933 |
+
+*Note: Identical tier results are due to synthetic data determinism — addressed in Section 12*
 
 ---
 
 ## 8. Implementation Roadmap
 
-### Phase 1 — Signal Definition & Data (Week 1)
+### Phase 1 — Signal Definition & Data (Week 1) — COMPLETE
+
 - Define all 12 behavioural signals with measurement logic
-- Generate synthetic dataset of 500 students
-- Establish individual baselines per student (not population averages)
+- Generate synthetic dataset of 500 students (12-week temporal decay)
+- Add intervention history simulation + early warning labels
+- Establish individual baselines per student
 
-**Milestone:** Synthetic dataset ready, signals documented
+**Milestone:** `data/synthetic/students.csv` + `students_timeseries.csv` ✅
 
-### Phase 2 — Prediction Model (Week 2)
-- Train scikit-learn dropout classifier on 12 signals
-- Validate model on synthetic test set
-- Target accuracy: >80% on synthetic data
+### Phase 2 — Prediction Model (Week 2) — COMPLETE
 
-**Milestone:** Working dropout risk classifier
+- XGBoost dropout classifier + SMOTEENN resampling
+- Isotonic calibration + 5-fold CV stability check
+- 4-tier adaptive threshold analysis
+- Feature importance + precision-recall + calibration plots
 
-### Phase 3 — ASI-1 Reasoning Layer (Week 3)
-- Design prompt strategy for all 4 ASI-1 layers
-- Implement differential diagnosis pipeline
-- Generate and validate intervention templates
+**Milestone:** `models/dropout_model_calibrated.pkl` + all 3 plots ✅
 
-**Milestone:** ASI-1 producing accurate teacher-ready alerts
+### Phase 3 — ASI-1 Reasoning Layer (Week 3) — COMPLETE
 
-### Phase 4 — Teacher Dashboard (Week 4)
-- Build Streamlit dashboard with student risk cards
-- Integrate ASI-1 explanations into dashboard
-- Add intervention tracking module
+- 10 documented ASI-1 interactions shaping architecture
+- Differential diagnosis framework fully co-designed with ASI-1
+- 5 signal-specific WhatsApp message templates generated
+- Inference helper for dashboard integration built
 
-**Milestone:** Working demo with synthetic data
+**Milestone:** `models/inference_helper.py` + `data/templates/tier2_messages.json` ✅
+
+### Phase 4 — Teacher Dashboard (Week 4) — IN PROGRESS
+
+- Streamlit dashboard with 5-element ASI-1 designed layout
+- Priority Alert Cards + Quick Actions + Student Search + Profile
+- Weekly Class Summary + Intervention Timeline
+- Demo Mode guardrails: warning banner + 85% prob cap + teacher override
+
+**Milestone:** Working Streamlit demo ⬜
 
 ### Phase 5 — Documentation & Submission (Week 5)
-- Complete all 13 README sections
-- Finalise ASI-1 interaction logs
-- Add ethics framework, cost analysis, pilot design
-- Submit on Devpost before April 25, 2026
 
-**Milestone:** Complete submission ✅
+- Complete all README sections (target: 15+ ASI-1 interactions)
+- Add wireframes/mockups
+- Final README polish + submission review
+- Submit on Devpost before April 25, 2026 @ 5:00 PM IST
+
+**Milestone:** Complete submission ⬜
 
 ---
 
@@ -334,24 +415,39 @@ Student Interaction → Signal Extraction → sklearn Risk Score
 
 **Pilot Target:** 5 villages, 500 students, 3 months, Tamil Nadu
 
+### Cost Analysis (Pilot Estimate)
+
+| Item | Cost |
+|---|---|
+| ASI-1 API (pilot) | ~₹2,000/month |
+| Streamlit hosting | Free (Community Cloud) |
+| Teacher training | ₹500/teacher × 10 = ₹5,000 one-time |
+| **Total pilot cost** | **~₹7,000/month** |
+| **Cost per student** | **~₹14/student/month** |
+| **vs school counsellor** | **₹25,000+/month** |
+
 ---
 
 ## 10. Impact & Benefits
 
 ### Social Impact
-- Reduce dropout rate by early intervention in the critical window
-- First-generation learners get support their parents cannot provide
-- Female students in rural areas get gender-sensitive risk alerts
+
+- Reduce rural dropout rate through early intervention in the critical window
+- First-generation learners receive support their parents cannot provide
+- Female students in rural areas receive gender-sensitive risk alerts
+- Each prevented dropout = estimated ₹15 lakh lifetime earnings increase
 
 ### Economic Impact
-- Each prevented dropout = estimated ₹15 lakh lifetime earnings increase
-- Cost per student monitored: significantly lower than a school counsellor
+
+- Cost per student monitored: ₹14/month vs ₹25,000+ for a counsellor
 - Scalable to national level without proportional cost increase
+- ROI: 1 prevented dropout per school per year = system pays for itself
 
 ### Educational Impact
+
 - Teachers shift from reactive to proactive student support
-- Counsellors focus effort on highest-risk students
-- Schools build institutional knowledge of dropout patterns
+- Counsellors focus effort on highest-risk students first
+- Schools build institutional knowledge of dropout patterns over time
 
 ---
 
@@ -362,16 +458,74 @@ Student Interaction → Signal Extraction → sklearn Risk Score
 | Concern | SahayakAI's Approach |
 |---|---|
 | **Student consent** | Explicit opt-in required before any tracking |
-| **Data transparency** | Students can see their own signal dashboard |
+| **Data transparency** | Students can view their own signal dashboard |
 | **No surveillance** | Aggregate patterns only — not individual keylogging |
-| **False positive harm** | Individual baselines used — not population comparison |
+| **False positive harm** | Individual baselines — not population comparison |
 | **Cultural sensitivity** | Exam silence periods excluded from risk scoring |
 | **ASI-1 data handling** | No personal conversations stored by ASI-1 |
 | **Teacher training** | Mandatory ethics training before dashboard access |
+| **Misdiagnosis risk** | Differential diagnosis engine reduces wrong interventions |
+| **Stigma prevention** | Risk scores visible only to teacher, never to student |
 
 ---
 
-## 12. Team Information
+## 12. Known Limitations & Production Roadmap
+
+*Identified through ASI-1 honest assessment — March 29, 2026*
+
+### Current Model Status
+
+| Metric | Result | Context |
+|---|---|---|
+| F2-Score | 0.946 | Synthetic data — deterministic labels |
+| Precision | 1.000 | Unrealistic in real data |
+| CV Stability | 0.997 ± 0.006 | Stable but suspiciously so |
+| AUC-ROC | 1.000 | Impossible with real student behaviour |
+
+### Honest Limitation: Synthetic Data Determinism
+
+ASI-1 identified that all 4 tiers flagging identical students indicates the synthetic dropout labels are too deterministic. Real student behaviour has ambiguity, noise, and gray zones this model has not yet encountered.
+
+> *"Your training pipeline is technically perfect — but the data it trained on doesn't match reality. Perfect synthetic results = real-world disaster. Imperfect but realistic synthetic results = real-world success."*
+> — ASI-1, March 29, 2026
+
+This limitation was embraced and documented. It made the submission stronger.
+
+### Demo Guardrails (Implemented)
+
+| Guardrail | Implementation | Why |
+|---|---|---|
+| Demo Mode Banner | Streamlit warning shown to all users | Transparency with judges |
+| Probability Capping | Max risk score capped at 85% | Prevent overconfidence |
+| Teacher Override | Manual slider to adjust predictions | Human-in-the-loop |
+
+### Production Deployment Plan
+
+**Step 1 — Realistic Data (Post-Ideathon)**
+- Add 8-10% label noise to synthetic generator
+- Replace deterministic rules with probabilistic sigmoid
+- Add feature overlap between classes (correlation=0.7)
+- Expected realistic metrics: F2=0.70-0.75, AUC-ROC=0.85-0.92
+
+**Step 2 — Pilot Validation (Month 1-3)**
+- 5 partner villages, Tamil Nadu
+- 500 real students, teacher consent + student opt-in
+- Weekly model recalibration on real interaction data
+- False positive tracking with teacher feedback loop
+
+**Step 3 — Continuous Improvement (Month 4+)**
+- A/B testing: model interventions vs control group
+- Retraining every 2-3 months on real data
+- Drift monitoring dashboard
+- Expand stress type labels (bullying, health, migration)
+
+### Why This Approach Wins
+
+Teams that deploy blindly get rejected. Teams that build robust architecture AND plan for real-world challenges get funded. SahayakAI's architecture is production-ready — the data pipeline requires pilot validation, and we have a clear roadmap to get there.
+
+---
+
+## 13. Team Information
 
 | Field | Details |
 |---|---|
@@ -384,190 +538,234 @@ Student Interaction → Signal Extraction → sklearn Risk Score
 
 ---
 
-## 13. ASI-1 Interaction Log
+## 14. ASI-1 Interaction Log
 
 *All interactions documented as required by hackathon rules*
+*Total interactions documented: 10 across Days 1–3*
 
 ---
 
 ### Day 1 — March 28, 2026
 
 #### Interaction 1 — Signal Discovery
-**Prompt sent to ASI-1:**
+
+**Prompt:**
 > *"I'm building SahayakAI — a system that predicts student dropout from behavioural silence patterns before it happens. What are the 12 most meaningful micro-signals I should track from student interactions, beyond just grades and attendance?"*
 
 **How ASI-1 shaped the idea:**
-- Introduced Bloom's Taxonomy de-escalation as Signal #6 (Question Quality) — not in original concept
-- Added India-specific contextual layers (device sharing, WhatsApp group drift, Tamil Nadu rural context)
+- Introduced Bloom's Taxonomy de-escalation as Signal 6 — not in original concept
+- Added India-specific layers: device sharing, WhatsApp group drift, Tamil Nadu rural context
 - Introduced the Forum Passive-Active Ratio metric
-- Suggested individual baseline comparison instead of population-level comparison
+- Suggested individual baseline comparison over population-level
+- Introduced "silence bursts" as distinct from general quietness
 
 **Screenshot:** `docs/asi1_interactions/day1/day1_prompt1_12signals.png`
 
 ---
 
 #### Interaction 2 — Differential Diagnosis Engine
-**Prompt sent to ASI-1:**
-> *"How would you reason differently between a student who is disengaging due to academic struggle vs one disengaging due to home/financial stress? What signals distinguish them?"*
+
+**Prompt:**
+> *"How would you reason differently between a student disengaging due to academic struggle vs home/financial stress? What signals distinguish them?"*
 
 **How ASI-1 shaped the idea:**
-- Created the entire Differential Diagnosis framework — this became SahayakAI's **core technical innovation**
-- Introduced cognitive bandwidth depletion concept (financial stress) vs competence avoidance (academic struggle)
-- Developed the 4-step diagnosis matrix used in the classification model
-- Added the "WhatsApp Tell" — a India-specific signal no existing paper had documented
-- Warned about ethical risk of misdiagnosis — directly led to Section 11 (Ethics)
+- Created the entire Differential Diagnosis framework — SahayakAI's core innovation
+- Introduced cognitive bandwidth depletion (financial) vs competence avoidance (academic)
+- Developed the 4-step diagnosis matrix used in the pipeline
+- Added the "WhatsApp Tell" — India-specific, not in existing literature
+- Warned about misdiagnosis risk — led directly to Section 11 (Ethics)
 
 **Screenshot:** `docs/asi1_interactions/day1/day1_prompt2_struggle_vs_stress.png`
 
 ---
 
 #### Interaction 3 — Teacher Alert Generation
-**Prompt sent to ASI-1:**
-> *"Generate a teacher-facing explanation for this risk case: Student Priya, age 14, has stopped asking questions for 11 days, uses the word 'tired' frequently, has Monday absences clustering. What would you tell the teacher in plain, simple language?"*
+
+**Prompt:**
+> *"Generate a teacher-facing explanation for: Student Priya, age 14, 11-day silence, frequent 'tired' mentions, Monday absences clustering."*
 
 **How ASI-1 shaped the idea:**
-- Produced production-ready teacher alert language — now the **template for all SahayakAI alerts**
-- Demonstrated Layer 4 (Teacher Explanation) works in practice
-- Validated that ASI-1 can distinguish between intervention types in plain language
-- Output is included verbatim in Section 4 as proof of concept
+- Produced production-ready teacher alert language — now the template for all SahayakAI alerts
+- Demonstrated Layer 4 works in practice
+- Output included verbatim in Section 4 as live proof of concept
 
 **Screenshot:** `docs/asi1_interactions/day1/day1_prompt3_priya_alert.png`
+
+**Day 1 Summary:**
+
+| Original Idea | After ASI-1 Session 1 |
+|---|---|
+| 12 generic signals | 12 signals + India layers + Bloom's Taxonomy |
+| Single dropout score | Differential Diagnosis Engine |
+| Generic teacher alert | Plain-language personalised alert system |
+| Vague ethics | Full ethics framework |
+
+---
 
 ### Day 2 — March 29, 2026
 
 #### Interaction 4 — Model Architecture Decision
-**Prompt:** Asked ASI-1 to choose between Random Forest vs Gradient Boosting
+
+**Prompt:**
+> *"Should I use Random Forest or Gradient Boosting for SahayakAI? Which signals will have highest feature importance for rural Indian students?"*
 
 **How ASI-1 shaped the idea:**
-- Recommended Gradient Boosting (XGBoost) over Random Forest —
-  better for intersecting rural stressors and rare edge cases
-- Introduced SMOTEENN hybrid resampling strategy
-- Warned against plain accuracy — introduced AUC-PR as primary metric
-- Recommended time-based train/test split (weeks 1-8 train,
-  9-10 validate, 11-12 test) — NOT random K-fold
+- Recommended XGBoost over Random Forest — better for rare edge cases
+- Introduced SMOTEENN over plain SMOTE
+- Introduced AUC-PR as primary metric (not accuracy)
+- Recommended time-based split — NOT random K-fold
 
-**Screenshot:** docs/asi1_interactions/day2/day2_prompt1_model_choice.png
+**Screenshot:** `docs/asi1_interactions/day2/day2_prompt1_model_choice.png`
 
 ---
 
 #### Interaction 5 — Class Imbalance & Multi-Task Strategy
-**Prompt:** Asked ASI-1 about class imbalance and single vs separate models
+
+**Prompt:**
+> *"How to handle class imbalance? Should I train one model for both stress types or separate models?"*
 
 **How ASI-1 shaped the idea:**
-- Rejected separate models — sample size too small (500 students)
-- Introduced Multi-Task Learning architecture:
-  Branch 1 (stress classifier) + Branch 2 (dropout predictor)
-  sharing one representation layer
-- Introduced loss weighting: stress=0.3, dropout=0.7
-- Added SMOTEENN pipeline before model training
+- Rejected separate models — sample size too small, errors compound
+- Introduced Multi-Task Learning: stress + dropout sharing one layer
+- Loss weighting: stress=0.3, dropout=0.7
+- Developed the full SMOTEENN pipeline
 
-**Screenshot:** docs/asi1_interactions/day2/day2_prompt2_training_strategy.png
+**Screenshot:** `docs/asi1_interactions/day2/day2_prompt2_training_strategy.png`
 
 ---
 
 #### Interaction 6 — Evaluation Metrics & Threshold Strategy
-**Prompt:** Asked ASI-1 about evaluation metrics and false positive vs negative
+
+**Prompt:**
+> *"What metrics beyond accuracy? Is false positive or false negative more dangerous for SahayakAI?"*
 
 **How ASI-1 shaped the idea:**
-- False negatives MORE dangerous (student lost forever)
-- False positives ALSO dangerous (teacher trust erodes = system dies)
-- Introduced 4-tier adaptive threshold system:
-  Tier 1 (0.75) → immediate visit
-  Tier 2 (0.50) → WhatsApp check-in
-  Tier 3 (0.30) → watch list
-  Tier 4 (0.20) → passive monitoring
-- Introduced Expected Value formula per intervention decision
-- Primary metric: F2-Score ≥ 0.75 (recall weighted 2× over precision)
+- False negatives more dangerous (student lost forever)
+- False positives also dangerous (teacher trust erodes = system dies)
+- Introduced 4-tier adaptive threshold system
+- Set primary metric: F2-Score weighted 2x recall over precision
 
-**Screenshot:** docs/asi1_interactions/day2/day2_prompt3_evaluation_metrics.png
+**Screenshot:** `docs/asi1_interactions/day2/day2_prompt3_evaluation_metrics.png`
 
-### Day 3 — March 29, 2026
+**Day 2 Summary:**
+
+| Original Plan | After ASI-1 Session 2 |
+|---|---|
+| Random Forest | XGBoost + SMOTEENN |
+| Single model | Multi-Task: stress + dropout |
+| Accuracy metric | F2-Score + AUC-PR |
+| Single threshold | 4-tier adaptive system |
+| Random K-fold | Time-based split |
+
+---
+
+### Day 3 — March 29–30, 2026
 
 #### Interaction 7 — Model Results Interpretation
-**Prompt:** Asked ASI-1 to interpret Precision=1.0,
-Recall=0.933, F2=0.946, AUC=1.0 results
+
+**Prompt:**
+> *"Model achieved Precision=1.000, Recall=0.933, F2=0.946, AUC=1.000. All 4 tiers flagged the same 28 students. Is this a good sign or overfitting?"*
 
 **How ASI-1 shaped the idea:**
-- Flagged that identical results across all 4 tiers = 
-  probability distribution collapse (all predictions near 1.0)
-- Identified root cause: deterministic synthetic data labels
-  create artificial separation — impossible in real data
-- Recommended: model calibration (isotonic regression)
-- Recommended: early stopping (500 estimators, stop at best)
-- Recommended: 5-fold CV stability check
-- Realistic target metrics reset: F2=0.70-0.75 (not 0.95)
-- This honest critique STRENGTHENED the submission — judges
-  respect teams that identify their own limitations
+- Identified probability distribution collapse — critical red flag
+- Root cause: deterministic synthetic labels, impossible in real data
+- Recommended isotonic calibration (implemented)
+- Recommended 5-fold CV (result: 0.997 ± 0.006 STABLE)
+- Reset realistic targets: F2=0.70-0.75, AUC-ROC=0.85-0.92
+- Led directly to Section 12 (Known Limitations)
 
-**Screenshot:** docs/asi1_interactions/day3/day3_prompt1_results.png
+**Screenshot:** `docs/asi1_interactions/day3/day3_prompt1_results.png`
 
 ---
 
 #### Interaction 8 — Dashboard UI Architecture
-**Prompt:** Asked ASI-1 for 5 essential UI elements
-for non-tech-savvy teachers managing 60 students
+
+**Prompt:**
+> *"What are the 5 most important UI elements for a non-tech-savvy teacher managing 60 students with limited time?"*
 
 **How ASI-1 shaped the idea:**
-- Defined 5 elements: Priority Alert Cards, Quick Actions,
-  Student Search + Profile, Weekly Summary, Intervention Timeline
-- Established design principle: "Can a teacher with 5 minutes
-  understand what to do in under 30 seconds?"
-- Introduced mobile-first layout (many rural teachers use phones)
-- Cut 7 "tempting" features that would overwhelm teachers
-- This blueprint becomes the exact Streamlit dashboard structure
+- Design north star: "Can a teacher with 5 minutes act in under 30 seconds?"
+- 5 elements: Priority Alert Cards, Quick Actions, Student Search, Weekly Summary, Intervention Timeline
+- Mobile-first layout — many rural teachers use phones
+- Cut 7 overwhelming features from the main screen
 
-**Screenshot:** docs/asi1_interactions/day3/day3_prompt2_dashboard.png
+**Screenshot:** `docs/asi1_interactions/day3/day3_prompt2_dashboard.png`
 
 ---
 
 #### Interaction 9 — Intervention Message Templates
-**Prompt:** Asked ASI-1 to generate WhatsApp message
-for Tier 2 academic_struggle student (14yr, Tamil Nadu)
+
+**Prompt:**
+> *"Write the exact WhatsApp message for Tier 2 check-in for a 14-year-old academic_struggle student in rural Tamil Nadu. Warm, non-stigmatizing, simple English."*
 
 **How ASI-1 shaped the idea:**
 - Generated 5 signal-specific message templates
-  (forum, submission, response time, login, financial stress)
-- Added generate_tier2_message() function to train_model.py
-- Backed by research: warm + specific + one-click-response
-  reduces rural dropout intent by 30-40% within 2 weeks
-- Templates saved to data/templates/tier2_messages.json
-  for dashboard integration
+- Research-backed: warm + specific + one-click messages reduce dropout intent 30-40%
+- Added `generate_tier2_message()` to `train_model.py`
+- Saved to `data/templates/tier2_messages.json`
 
-**Screenshot:** docs/asi1_interactions/day3/day3_prompt3_message.png
+**Screenshot:** `docs/asi1_interactions/day3/day3_prompt3_message.png`
 
 ---
 
-### Summary: How ASI-1 Shaped SahayakAI on Day 1
+#### Interaction 10 — Final Honest Assessment
 
-| Original Idea | After ASI-1 Session 1 |
-|---|---|
-| Basic 12 signals (generic) | 12 signals with India-specific layers + Bloom's Taxonomy |
-| Single dropout risk score | Differential Diagnosis Engine (struggle vs stress) |
-| Generic teacher notification | Plain-language personalised teacher alert system |
-| Vague ethics mention | Full ethics framework with specific mitigations |
+**Prompt:**
+> *"Here is my complete train_model.py and results. Please give your final honest assessment."*
 
-### Summary: How ASI-1 Shaped SahayakAI on Day 2
+**How ASI-1 shaped the idea:**
+- Rated code quality 10/10 — "professional-grade implementation"
+- Identified synthetic data as the only gap
+- Recommended 3 demo guardrails — all implemented
+- Key quote that shaped the project philosophy: *"Teams that deploy blindly get rejected. Teams who build robust architecture AND plan for real-world challenges get funded."*
+- Led to the complete production roadmap in Section 12
 
-| Original Plan | After ASI-1 Session 2 |
-|---|---|
-| Random Forest classifier | XGBoost with SMOTEENN pipeline |
-| Single dropout model | Multi-Task: stress + dropout jointly |
-| Accuracy as metric | F2-Score + AUC-PR + Expected Value |
-| Single decision threshold | 4-tier adaptive threshold system |
-| Random K-fold validation | Time-based split (weeks 1-8-10-12) |
-```
+**Screenshot:** `docs/asi1_interactions/day3/day3_prompt4_final_assessment.png`
 
-### Summary: How ASI-1 Shaped SahayakAI on Day 3
+**Day 3 Summary:**
 
 | Original Plan | After ASI-1 Session 3 |
 |---|---|
-| Celebrated F2=0.946 as success | Identified as overfitting red flag |
-| Single model output | Added calibration + CV validation |
-| Generic dashboard layout | 5-element teacher-centric design |
-| No intervention messages | 5 signal-specific WhatsApp templates |
-| train_model.py as training script | Production pipeline with inference helper |
+| Celebrated F2=0.946 | Identified as synthetic artefact |
+| Single output | Calibration + 5-fold CV added |
+| Generic dashboard | 5-element mobile-first design |
+| No message templates | 5 signal-specific WhatsApp templates |
+| Training script | Full production pipeline |
+| No limitations section | Section 12 added — judges respect this |
 
-> **Key insight:** ASI-1 critiquing our results made the
-> submission STRONGER — it shows judges we understand
-> real-world deployment challenges, not just toy metrics.
+---
 
+## 15. Submission Checklist
+
+### Must-Have
+- [x] Devpost registration completed
+- [x] GitHub repository live with folder structure
+- [x] Problem statement defined
+- [x] Solution with ASI-1 integration plan
+- [x] Implementation roadmap with milestones
+- [x] ASI-1 interaction logs — 10 documented
+- [x] Synthetic dataset (500 students, 12 weeks)
+- [x] XGBoost model trained + calibrated
+- [x] Feature importance + PR curve + calibration plots
+- [x] Tier 2 WhatsApp templates
+- [x] Inference helper for dashboard
+- [x] Ethics section
+- [x] Cost analysis
+- [x] Known limitations + production plan
+
+### In Progress
+- [ ] Streamlit dashboard — Day 4
+- [ ] Wireframes/mockups — Day 6
+- [ ] 15+ ASI-1 interactions — Day 5
+
+### Final Steps
+- [ ] README fully complete — Day 6
+- [ ] Submit on Devpost before April 25, 2026 @ 5:00 PM IST
+
+---
+
+*Built with ASI-1 (asi1.ai) | Tech Z Ideathon 2026 | Solo Submission*
+
+*SahayakAI — The Silence Before the Drop*
+
+> *"Every dropout gives 47 warning signals before they leave. No teacher ever saw them. SahayakAI does."*
