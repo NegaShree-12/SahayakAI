@@ -469,6 +469,60 @@ SahayakAI/
 
 ---
 
+## 11.7 Pilot Design & Success Metrics
+
+*Developed with ASI-1 — March 31, 2026*
+
+### Pilot Scope
+- **Location:** 5 villages, Tamil Nadu
+- **Students:** 500 (aged 12-18)
+- **Duration:** 3 months
+- **Teachers:** ~10 government school teachers
+
+### 5 Success Metrics (Priority-Weighted)
+
+| # | Metric | Target | Weight |
+|---|---|---|---|
+| 1 | Primary Intervention Rate (flagged → teacher acts ≤48hrs) | ≥ 80% | 35% |
+| 2 | Tier 1-2 Dropout Reduction vs historical baseline | ≥ 50% | 30% |
+| 3 | Intervention Effectiveness (WhatsApp ≥60%, Home Visit ≥85%) | Per type | 20% |
+| 4 | Teacher Hours Saved per month | ≥ 40 hrs | 10% |
+| 5 | Real-data F2-Score (expected degradation from synthetic) | ≥ 0.50 | 5% |
+
+### 3-Group Comparison Framework
+
+| Group | Students | What It Proves |
+|---|---|---|
+| **Flagged + Intervened** | Tier 1-2, teacher acted | SahayakAI's core impact zone |
+| **Flagged + NOT Intervened** | Tier 1-2, teacher didn't act | Proves prediction works, gap shows intervention value |
+| **Not Flagged (Low Risk)** | Tier 3-4 | Baseline comparison |
+
+> If Group 1 retains at 78% and Group 2 retains at 43%, the 35-point gap proves **predictions + interventions** work — not just school-wide improvement.
+
+### Expected 3-Month Results Table
+
+| Metric | Target | Status |
+|---|---|---|
+| Primary Intervention Rate | ≥ 80% | To be measured |
+| Tier 1-2 Dropout Reduction | ≥ 50% | To be measured |
+| WhatsApp Success Rate | ≥ 60% | To be measured |
+| Home Visit Success Rate | ≥ 85% | To be measured |
+| Teacher Hours Saved/month | ≥ 40 hrs | To be measured |
+| Teacher Trust Score | ≥ 75% | To be measured |
+| Real-data F2-Score | ≥ 0.50 | To be measured |
+
+### Expected Model Degradation (Honest)
+
+| Metric | Synthetic Training | Real 3-Month Target |
+|---|---|---|
+| F2-Score | 0.946 | ≥ 0.50 (40-50% degradation expected) |
+| Recall | 0.933 | ≥ 0.60 |
+| Precision | 1.000 | ≥ 0.15 (manageable false positives) |
+| Brier Score | 0.015 | ≤ 0.20 |
+
+The story is not perfection — it is graceful degradation with a retraining pipeline.
+```
+
 ## 12. Known Limitations & Production Roadmap
 
 *Identified through ASI-1 honest assessment — March 29, 2026*
@@ -722,6 +776,8 @@ Teams that deploy blindly get rejected. Teams that build robust architecture AND
 
 **Screenshot:** `docs/asi1_interactions/day3/day3_prompt4_final_assessment.png`
 
+
+
 **Day 3 Summary:**
 
 | Original Plan | After ASI-1 Session 3 |
@@ -733,6 +789,55 @@ Teams that deploy blindly get rejected. Teams that build robust architecture AND
 | Training script | Full production pipeline |
 | No limitations section | Section 12 added — judges respect this |
 
+
+### Day 4 — March 31, 2026
+
+#### Interaction 11 — Judge Evaluation Criteria
+**Prompt:** Asked ASI-1 what top 3 things a judge
+evaluating the dashboard would look for
+
+**How ASI-1 shaped the idea:**
+- Identified 3 judge priorities (weighted):
+  Problem-Solution Fit (35%), Technical Credibility (25%),
+  Social Impact Strategy (20%)
+- Dashboard scored 7.8/10 — identified 2 missing pieces:
+  privacy section + 2 code warnings
+- Provided exact 3-minute demo script for presentation
+- Added privacy & data security section to dashboard
+- Fixes: empty label warning + use_container_width deprecation
+
+**Screenshot:** docs/asi1_interactions/day4/day4_prompt1_judge_dashboard.png
+
+---
+
+#### Interaction 12 — Pilot Success Metrics
+**Prompt:** Asked ASI-1 for 5 pilot success metrics
+for 5 villages, 500 students, 3 months, Tamil Nadu
+
+**How ASI-1 shaped the idea:**
+- Defined 5 weighted metrics:
+  1. Prediction-Driven Intervention Rate (35%) — ≥80% in 48hrs
+  2. Actual Dropout Reduction (30%) — ≥50% for flagged cohort
+  3. Intervention Effectiveness by Type (20%) — WhatsApp 60%,
+     Home Visit 85%
+  4. False Positive Cost Reduction (10%) — 40+ hrs saved/teacher
+  5. Model Calibration on Real Data (5%) — F2≥0.50
+- Provided 3-group comparison framework (flagged+intervened,
+  flagged+not-intervened, not-flagged)
+- Provided complete 3-month pilot results table template
+- Key insight: "Vanity metrics (dashboard views) = rejected.
+  Dropout reduction in intervened cohort = funded."
+
+**Screenshot:** docs/asi1_interactions/day4/day4_prompt2_pilot_metrics.png
+
+**Day 4 Summary:**
+
+| Original Plan | After ASI-1 Session 4 |
+|---|---|
+| Dashboard complete | +privacy section, +2 fixes → 9/10 |
+| Vague "pilot plan" | 5 weighted metrics with exact targets |
+| "Did it work?" unclear | 3-group comparison framework |
+| No demo script | Exact 3-minute judge demo flow |
 ---
 
 ## 15. Submission Checklist

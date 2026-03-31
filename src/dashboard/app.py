@@ -12,6 +12,7 @@ Demo guardrails (ASI-1 recommended):
   - Demo Mode warning banner
   - Probability capped at 85%
   - Teacher override slider
+  - Privacy & Security section
 
 Run: streamlit run src/dashboard/app.py
 
@@ -299,6 +300,15 @@ st.markdown("""
     font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* ── Privacy card ── */
+.privacy-card {
+    background: #0D1117;
+    border: 1px solid #30363D;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 24px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -628,12 +638,13 @@ with left_col:
             </div>
             """, unsafe_allow_html=True)
 
-    # ── ELEMENT 3 — Student Search + Profile ─────────────────────────────────
+    # ── ELEMENT 3 — Student Search + Profile (FIXED: added label) ─────────────
     st.markdown('<div class="section-header">Student Search & Profile</div>', unsafe_allow_html=True)
 
     all_names = df["name"].tolist()
+    # FIXED: Added non-empty label
     search_query = st.text_input(
-        "",
+        "Search Student",
         placeholder="Type student name or roll number...",
         label_visibility="collapsed",
         key="search_box"
@@ -745,7 +756,7 @@ with left_col:
 # ── RIGHT: ELEMENT 2 + ELEMENT 5 ─────────────────────────────────────────────
 with right_col:
 
-    # ELEMENT 2 — Quick Actions
+    # ELEMENT 2 — Quick Actions (FIXED: replaced use_container_width)
     st.markdown('<div class="section-header">Quick Actions</div>', unsafe_allow_html=True)
 
     actions = [
@@ -761,7 +772,7 @@ with right_col:
         clicked = st.button(
             f"{icon}  {label}",
             key=f"action_{label}",
-            use_container_width=True,
+            width='stretch',  # FIXED: replaced use_container_width
         )
         st.markdown(f'<div style="font-size:0.7rem; color:#8B949E; margin:-6px 0 6px 4px;">{effort}</div>', unsafe_allow_html=True)
         if clicked:
@@ -879,10 +890,36 @@ with table_col:
 
     st.dataframe(
         show_df,
-        use_container_width=True,
+        width='stretch',  # FIXED: replaced use_container_width
         height=260,
         hide_index=True,
     )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PRIVACY & SECURITY SECTION
+# ══════════════════════════════════════════════════════════════════════════════
+
+st.markdown("""
+<div class="privacy-card">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+    <span style="font-size:1.2rem;">🔒</span>
+    <span style="font-weight:600; color:#E6EDF3;">Privacy & Data Security</span>
+  </div>
+  <div style="font-size:0.75rem; color:#8B949E; line-height:1.6;">
+    • Student data stored locally on school servers — no third-party cloud transmission<br>
+    • Personally identifiable information anonymized before model training<br>
+    • Parent/guardian consent required before any data collection<br>
+    • Role-based access: teachers see only their assigned students<br>
+    • GDPR-compliant data handling for production deployment<br>
+    • Model retraining uses aggregated, de-identified patterns only
+  </div>
+  <div style="margin-top:10px; font-size:0.7rem; color:#484F58; border-top:1px solid #21262D; padding-top:8px;">
+    ⚠️ DEMO MODE: This dashboard uses synthetic data. Production deployment requires
+    formal data protection impact assessment and school board approval.
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
