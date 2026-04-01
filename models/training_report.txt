@@ -5,37 +5,37 @@ Tech Z Ideathon 2026 | The Silence Before the Drop
 DATASET
   Students   : 500
   Features   : 43
-  At-risk    : 150 (30.0%)
+  At-risk    : 156 (31.2%)
 
 MODEL
   Type       : XGBoost
   Resampling : SMOTEENN
-  Calibration improved Brier Score by -2.9%
+  Calibration improved Brier Score by 72.3%
 
 MODEL STABILITY
   CV Stability: STABLE
-  CV F2-Score: 0.997 ± 0.006
+  CV F2-Score: 0.999 ± 0.002
 
 EVALUATION (Calibrated Model, threshold=0.50)
   Precision  : 1.0000
-  Recall     : 0.9333
-  F1-Score   : 0.9655
-  F2-Score   : 0.9459  ← PRIMARY METRIC
+  Recall     : 1.0000
+  F1-Score   : 1.0000
+  F2-Score   : 1.0000  ← PRIMARY METRIC
   AUC-ROC    : 1.0000
-  TP=28  FP=0  FN=2  TN=70
+  TP=31  FP=0  FN=0  TN=69
 
 4-TIER THRESHOLD RESULTS
-  Tier 1 — Immediate Visit         thresh=0.75  P=1.00  R=0.93  F2=0.95  flagged=28
-  Tier 2 — Digital Check-In        thresh=0.5  P=1.00  R=0.93  F2=0.95  flagged=28
-  Tier 3 — Watch List              thresh=0.3  P=1.00  R=0.93  F2=0.95  flagged=28
-  Tier 4 — Baseline Monitor        thresh=0.2  P=1.00  R=0.93  F2=0.95  flagged=28
+  Tier 1 — Immediate Visit         thresh=0.75  P=1.00  R=0.97  F2=0.97  flagged=30
+  Tier 2 — Digital Check-In        thresh=0.5  P=1.00  R=1.00  F2=1.00  flagged=31
+  Tier 3 — Watch List              thresh=0.3  P=1.00  R=1.00  F2=1.00  flagged=31
+  Tier 4 — Baseline Monitor        thresh=0.2  P=1.00  R=1.00  F2=1.00  flagged=31
 
 TOP 5 FEATURES
-  1. optional_activity_rate                    : 0.2963
-  2. resource_depth_shift                      : 0.2472
-  3. response_time_decay_hrs                   : 0.1819
-  4. collaborative_tool_drift_days             : 0.1692
-  5. forum_passive_active_ratio                : 0.1054
+  1. silence_burst_count_std_last4w            : 0.3787
+  2. silence_burst_count_mean_last4w           : 0.1512
+  3. optional_activity_rate_std_last4w         : 0.1158
+  4. collaborative_tool_drift_days_mean_last4w : 0.0739
+  5. feedback_response_rate                    : 0.0364
 
 OUTPUT FILES GENERATED
   - models/dropout_model.pkl (uncalibrated)

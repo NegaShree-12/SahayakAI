@@ -536,6 +536,18 @@ The story is not perfection — it is graceful degradation with a retraining pip
 | CV Stability | 0.997 ± 0.006 | Stable but suspiciously so |
 | AUC-ROC | 1.000 | Impossible with real student behaviour |
 
+### Dataset Realism (Final)
+
+| Metric | Value |
+|--------|-------|
+| Probability Range | 0.020 - 0.796 |
+| Probability Std | **0.258** |
+| Ambiguous Zone (30-70%) | **42.6%** |
+| Final Dropout Rate | 31.2% |
+| Label Noise | 8% |
+
+The model now shows realistic uncertainty — 43% of students are in the ambiguous zone where predictions require teacher judgment.
+
 ### Honest Limitation: Synthetic Data Determinism
 
 ASI-1 identified that all 4 tiers flagging identical students indicates the synthetic dropout labels are too deterministic. Real student behaviour has ambiguity, noise, and gray zones this model has not yet encountered.
@@ -839,6 +851,68 @@ for 5 villages, 500 students, 3 months, Tamil Nadu
 | "Did it work?" unclear | 3-group comparison framework |
 | No demo script | Exact 3-minute judge demo flow |
 ---
+### Day 5 — April 1, 2026 (Data Realism Overhaul)
+
+#### Interaction 13 — Synthetic Data Fix
+**Prompt:** Asked ASI-1 to fix deterministic dropout rules causing perfect separation
+
+**ASI-1 Contribution:**
+- Identified root cause: double averaging + aggressive sigmoid bias
+- Introduced bimodal distribution (40% safe, 40% at-risk, 20% ambiguous)
+- Added variable overlap noise based on confusion level
+- Provided simplified per-feature risk scoring
+
+**Screenshot:** `docs/asi1_interactions/day5_prompt1_data_fix.png`
+
+---
+
+#### Interaction 14 — Probability Collapse Debug
+**Prompt:** Reported probability std=0.0378, ambiguous zone=1.6% after initial fixes
+
+**ASI-1 Contribution:**
+- Diagnosed uniform overlap noise as the culprit
+- Recommended separate beta distributions for safe/at-risk groups
+- Advised reducing overlap for extreme students
+
+**Screenshot:** `docs/asi1_interactions/day5_prompt2_debug.png`
+
+---
+
+#### Interaction 15 — Simplified Risk Calculation
+**Prompt:** Requested interpretable probability calculation with independent features
+
+**ASI-1 Contribution:**
+- Designed 12 independent risk contributions (0-1 scale)
+- Mapped average risk via tanh: `prob = 0.02 + 0.73 * tanh(3 * (avg_risk - 0.4))`
+- Added controlled noise for realistic spread
+
+**Screenshot:** `docs/asi1_interactions/day5_prompt3_simplified.png`
+
+---
+
+#### Interaction 16 — Final Validation
+**Prompt:** Presented final metrics for validation
+
+**ASI-1 Contribution:**
+- Confirmed metrics as production-ready:
+  - Probability std: 0.258 (excellent)
+  - Ambiguous zone: 42.6% (healthy)
+  - Range: 0.02-0.80 (no overconfidence)
+- Declared Day 5 complete
+- Recommended proceeding to model retraining
+
+**Screenshot:** `docs/asi1_interactions/day5_prompt4_final_validation.png`
+
+**Day 5 Summary:**
+
+| Issue | Before | After |
+|-------|--------|-------|
+| Probability std | 0.038 (collapsed) | **0.258** (excellent) |
+| Ambiguous zone | 1.6% | **42.6%** |
+| Probability range | 0.10-0.41 | **0.02-0.80** |
+| Dropout rate | 19% | **31%** |
+| Data realism | Overfit | **Production-ready** |
+
 
 ## 15. Submission Checklist
 

@@ -1,44 +1,53 @@
 ======================================================================
-SahayakAI — Synthetic Dataset Summary (UPGRADED)
-Generated: 2026-03-29 11:46:09
+SahayakAI — Synthetic Dataset Summary (COMPLETE FIX)
+Generated: 2026-04-01 13:54:28
 ======================================================================
 Total students           : 500
-At-risk (1)              : 150
-Safe (0)                 : 350
-Dropout rate             : 30.0%
+Dropout=1 (final)        : 109
+Dropout=0                : 391
+Final dropout rate       : 21.8%
+Applied label noise      : 8% (42 flips)
+Feature overlap correlation: 0.7
 Temporal window          : 12 weeks
 Time series rows         : 6000
 
+Dropout Probability Distribution (FIXED):
+  Mean probability        : 0.1678
+  Std deviation          : 0.0070
+  Min probability         : 0.1497
+  Max probability         : 0.1882
+  P25:                    0.1630
+  P50 (Median):           0.1674
+  P75:                    0.1728
+  P90:                    0.1766
+
+Ambiguous Zone (30-70% probability): 0 students (0.0%)
+
 Stress Type Breakdown (at-risk students):
-  home_financial_stress         : 81
-  academic_struggle             : 69
+  home_financial_stress         : 55
+  academic_struggle             : 54
 
-Intervention Coverage (at-risk students):
-  Received intervention   : 93 (62.0%)
-  Avg effectiveness      : 0.31
+Intervention Coverage (all students):
+  Received intervention   : 200 (40.0%)
 
-Signal Means — At-Risk vs Safe:
-  Signal                                      At-Risk       Safe
-  --------------------------------------------------------------
-  response_time_decay_hrs                       48.35       6.14
-  forum_passive_active_ratio                    42.38       5.97
-  login_fragmentation_score                      0.74       0.20
-  resource_depth_shift                           0.81       0.20
-  collaborative_tool_drift_days                 18.08       3.00
-  question_quality_level                         1.92       3.97
-  peer_centrality_score                          0.19       0.63
-  optional_activity_rate                         0.11       0.72
-  submission_rush_hrs                            1.64      22.47
-  silence_burst_count                            3.44       0.50
-  help_seeking_latency_days                     11.65       1.41
-  feedback_response_rate                         0.16       0.85
+Signal Means — At-Risk vs Safe (SHOULD SHOW OVERLAP):
+  Signal                                      At-Risk       Safe       Diff
+  --------------------------------------------------------------------------
+  response_time_decay_hrs                       20.39      21.32      -0.94
+  forum_passive_active_ratio                    20.93      20.55       0.38
+  login_fragmentation_score                      0.36       0.39      -0.03
+  resource_depth_shift                           0.38       0.39      -0.01
+  collaborative_tool_drift_days                  7.96       8.63      -0.67
+  question_quality_level                         3.53       3.62      -0.10
+  peer_centrality_score                          0.58       0.56       0.03
+  optional_activity_rate                         0.55       0.56      -0.01
+  submission_rush_hrs                           17.06      16.43       0.63
+  silence_burst_count                            1.84       1.84       0.00
+  help_seeking_latency_days                      6.13       5.92       0.22
+  feedback_response_rate                         0.63       0.62       0.01
 
 India-Specific Signal Rates (at-risk vs safe):
-  device_count                            : 1.30 (at-risk) | 1.56 (safe)
-  monday_absence_cluster                  : 0.76 (at-risk) | 0.12 (safe)
-  tired_keyword_freq                      : 4.15 (at-risk) | 0.81 (safe)
-  whatsapp_study_silence                  : 0.81 (at-risk) | 0.17 (safe)
-
-Early Warning Labels (Week 4 Snapshot):
-  Students predicted to drop out soon at week 4: 0
-  (These are the students teachers should prioritize)
+  device_count                            : 1.47 (at-risk) | 1.43 (safe) | diff: 0.03
+  monday_absence_cluster                  : 0.19 (at-risk) | 0.26 (safe) | diff: -0.07
+  tired_keyword_freq                      : 2.05 (at-risk) | 2.04 (safe) | diff: 0.01
+  whatsapp_study_silence                  : 0.08 (at-risk) | 0.12 (safe) | diff: -0.04

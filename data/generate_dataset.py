@@ -1,21 +1,16 @@
 """
-SahayakAI — Synthetic Student Dataset Generator (UPGRADED)
-===========================================================
-Generates realistic synthetic data for 500 students
-based on the 12 behavioural micro-signals defined with ASI-1.
+SahayakAI — Synthetic Student Dataset Generator (FINAL CORRECT)
+=================================================================
+Generates realistic synthetic data with proper probability spread.
 
-UPGRADES INCLUDED:
-✅ Temporal Decay Simulation (12-week time series)
-✅ Early Warning Labels (predict dropout before it happens)
-✅ Teacher Intervention History (for dashboard demo)
+FIXES:
+- Simplified interpretable risk calculation
+- Direct per-feature risk scoring (0-1)
+- Bimodal distribution (40% safe, 40% at-risk, 20% ambiguous)
+- Variable overlap noise based on confusion level
+- Realistic dropout rate (18-25%)
 
-Run: python generate_dataset.py
-Output: 
-  - data/synthetic/students.csv (static snapshot)
-  - data/synthetic/students_timeseries.csv (12-week temporal data)
-  - data/synthetic/students_info.txt (summary report)
-
-Tech Z Ideathon 2026 | SahayakAI — The Silence Before the Drop
+Run: python data/generate_dataset.py
 """
 
 import pandas as pd
@@ -31,21 +26,19 @@ random.seed(42)
 # ── Output folder ─────────────────────────────────────────────────────────────
 os.makedirs("data/synthetic", exist_ok=True)
 
-# ── Constants ─────────────────────────────────────────────────────────────────
-N_STUDENTS      = 500
-DROPOUT_RATE    = 0.30   # 30% dropout — realistic for rural India
-N_DROPOUT       = int(N_STUDENTS * DROPOUT_RATE)
-N_SAFE          = N_STUDENTS - N_DROPOUT
-WEEKS           = 12      # 12-week observation window
+# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+N_STUDENTS = 500
+WEEKS = 12
+LABEL_NOISE_RATE = 0.08
 
 print("=" * 70)
-print("  SahayakAI — Synthetic Dataset Generator (UPGRADED)")
+print("  SahayakAI — Synthetic Dataset Generator (FINAL CORRECT)")
 print("  Tech Z Ideathon 2026 | The Silence Before the Drop")
 print("=" * 70)
 print(f"\n  📊 Generating {N_STUDENTS} students...")
-print(f"     At-risk (dropout=1) : {N_DROPOUT}")
-print(f"     Safe    (dropout=0) : {N_SAFE}")
-print(f"     Temporal window     : {WEEKS} weeks\n")
+print(f"     Label noise: {LABEL_NOISE_RATE*100:.0f}%")
+print(f"     Distribution: 40% safe, 40% at-risk, 20% ambiguous")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
@@ -55,208 +48,303 @@ def clip(value, lo, hi):
     """Clip a value between lo and hi."""
     return max(lo, min(hi, value))
 
-def noisy(base, std, lo, hi, dtype=float):
-    """Add Gaussian noise to a base value, then clip."""
-    val = base + np.random.normal(0, std)
-    val = clip(val, lo, hi)
-    return round(val, 2) if dtype == float else int(round(val))
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 def intervention_type():
-    """Random intervention type for at-risk students."""
     return random.choice(["voice_message", "peer_buddy", "counsellor", "parent_call", "motivational_story"])
 
 def intervention_effectiveness(intervention, week, risk_level):
-    """
-    Simulate intervention effectiveness.
-    Earlier interventions = more effective.
-    """
     if intervention == "none":
         return 0
-    
-    # Effectiveness decays if intervention is late
     base_effect = {
-        "voice_message": 0.65,
-        "peer_buddy": 0.72,
-        "counsellor": 0.58,
-        "parent_call": 0.45,
-        "motivational_story": 0.55
+        "voice_message": 0.65, "peer_buddy": 0.72, "counsellor": 0.58,
+        "parent_call": 0.45, "motivational_story": 0.55
     }.get(intervention, 0.50)
-    
-    # Late interventions (after week 8) are less effective
     if week > 8:
         base_effect *= 0.6
     elif week > 5:
         base_effect *= 0.85
-    
-    # Add randomness
-    effectiveness = base_effect + np.random.normal(0, 0.1)
-    return clip(effectiveness, 0, 1)
+    return clip(base_effect + np.random.normal(0, 0.1), 0, 1)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SIGNAL GENERATION — AT-RISK STUDENTS (dropout = 1)
+# GENERATE STUDENT PROFILES (BIMODAL DISTRIBUTION)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def generate_at_risk(student_id_num):
-    """Generate one at-risk student record."""
+def generate_student_profiles(n_students):
+    """
+    Generate student profiles with bimodal distribution.
+    40% clearly safe, 40% clearly at-risk, 20% ambiguous.
+    """
     
-    # Randomly assign root cause — critical for Differential Diagnosis Engine
-    stress_type = random.choice(["academic_struggle", "home_financial_stress"])
+    # Signal params with WIDE std devs
+    signal_params = {
+        'response_time_decay_hrs': {'at_risk': (48, 28), 'safe': (6, 24)},
+        'forum_passive_active_ratio': {'at_risk': (45, 24), 'safe': (8, 16)},
+        'login_fragmentation_score': {'at_risk': (0.75, 0.28), 'safe': (0.20, 0.24)},
+        'resource_depth_shift': {'at_risk': (0.75, 0.28), 'safe': (0.20, 0.24)},
+        'collaborative_tool_drift_days': {'at_risk': (18, 10), 'safe': (3, 7)},
+        'question_quality_level': {'at_risk': (2.0, 1.5), 'safe': (4.5, 1.4)},
+        'peer_centrality_score': {'at_risk': (0.20, 0.22), 'safe': (0.75, 0.22)},
+        'optional_activity_rate': {'at_risk': (0.15, 0.22), 'safe': (0.75, 0.22)},
+        'submission_rush_hrs': {'at_risk': (3, 12), 'safe': (24, 18)},
+        'silence_burst_count': {'at_risk': (4, 3.0), 'safe': (0.5, 1.5)},
+        'help_seeking_latency_days': {'at_risk': (14, 8), 'safe': (2, 5)},
+        'feedback_response_rate': {'at_risk': (0.20, 0.18), 'safe': (0.85, 0.18)},
+    }
     
-    # Intervention history (randomized for realism)
-    has_intervention = random.choices([0, 1], weights=[0.4, 0.6])[0]
+    # Bounds for clipping
+    bounds = {
+        'response_time_decay_hrs': (0, 96),
+        'forum_passive_active_ratio': (1, 80),
+        'login_fragmentation_score': (0, 1),
+        'resource_depth_shift': (0, 1),
+        'collaborative_tool_drift_days': (0, 30),
+        'question_quality_level': (1, 6),
+        'peer_centrality_score': (0, 1),
+        'optional_activity_rate': (0, 1),
+        'submission_rush_hrs': (0, 48),
+        'silence_burst_count': (0, 10),
+        'help_seeking_latency_days': (0, 30),
+        'feedback_response_rate': (0, 1),
+    }
+    
+    all_profiles = []
+    
+    for i in range(n_students):
+        # BIMODAL DISTRIBUTION: 40% safe, 40% at-risk, 20% ambiguous
+        mode_choice = random.random()
+        
+        if mode_choice < 0.40:
+            # 40% clearly safe (Beta with small alpha, large beta)
+            true_risk_prob = np.random.beta(1.5, 6)
+        elif mode_choice < 0.80:
+            # 40% clearly at-risk (Beta with large alpha, small beta)
+            true_risk_prob = np.random.beta(5, 1.5)
+        else:
+            # 20% ambiguous/uncertain (uniform in the middle)
+            true_risk_prob = np.random.uniform(0.3, 0.7)
+        
+        true_risk = true_risk_prob > 0.5
+        
+        profile = {}
+        
+        for signal, params in signal_params.items():
+            if true_risk:
+                mean, std = params['at_risk']
+                value = np.random.normal(mean, std)
+            else:
+                mean, std = params['safe']
+                value = np.random.normal(mean, std)
+            
+            lo, hi = bounds[signal]
+            profile[signal] = clip(value, lo, hi)
+            
+            # DIFFERENT overlap based on confusion level
+            confusion = 1 - abs(true_risk_prob - 0.5) * 2  # 0 = extreme, 1 = confused
+            overlap_std = (hi - lo) * 0.06 * confusion
+            overlap_noise = np.random.normal(0, overlap_std)
+            profile[signal] = clip(profile[signal] + overlap_noise, lo, hi)
+        
+        # Calculate probability using simplified method
+        prob = calculate_dropout_probability(profile)
+        
+        all_profiles.append({
+            **profile,
+            '_true_risk': true_risk,
+            '_true_risk_prob': true_risk_prob,
+            '_raw_probability': prob,
+        })
+    
+    return all_profiles
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PROBABILITY CALCULATION (SIMPLIFIED & INTERPRETABLE)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def calculate_dropout_probability(signals):
+    """
+    Simple, interpretable probability calculation.
+    Each dimension contributes independently.
+    Risk contributions are 0-1 where 1 = maximum risk.
+    """
+    
+    risk_contributions = {}
+    
+    # 1. Response time decay: 0-96 hours
+    # 0-12 hrs → 0.0 risk, 36-96 hrs → 1.0 risk
+    rt = signals['response_time_decay_hrs']
+    risk_contributions['response_time'] = clip((rt - 12) / 84, 0, 1)
+    
+    # 2. Forum passive-active ratio: 1-80
+    # 1-5 → 0.0 risk, 20-80 → 1.0 risk
+    fr = signals['forum_passive_active_ratio']
+    risk_contributions['forum'] = clip((fr - 5) / 75, 0, 1)
+    
+    # 3. Login fragmentation: 0-1 (higher = more fragmented = more risk)
+    risk_contributions['login'] = signals['login_fragmentation_score']
+    
+    # 4. Resource depth shift: 0-1 (higher = shallow = more risk)
+    risk_contributions['resource'] = signals['resource_depth_shift']
+    
+    # 5. Collaborative tool drift: 0-30 days
+    td = signals['collaborative_tool_drift_days']
+    risk_contributions['drift'] = clip(td / 25, 0, 1)
+    
+    # 6. Question quality: 1-6 (lower = worse = more risk)
+    qq = signals['question_quality_level']
+    risk_contributions['quality'] = 1 - clip((qq - 1) / 5, 0, 1)
+    
+    # 7. Peer centrality: 0-1 (lower = less central = more risk)
+    risk_contributions['centrality'] = 1 - signals['peer_centrality_score']
+    
+    # 8. Optional activity rate: 0-1 (lower = abandoned = more risk)
+    risk_contributions['optional'] = 1 - signals['optional_activity_rate']
+    
+    # 9. Submission rush: 0-48 hours (lower = more rushed = more risk)
+    sr = signals['submission_rush_hrs']
+    risk_contributions['rush'] = 1 - clip(sr / 36, 0, 1)
+    
+    # 10. Silence bursts: 0-10
+    sb = signals['silence_burst_count']
+    risk_contributions['silence'] = clip(sb / 6, 0, 1)
+    
+    # 11. Help seeking latency: 0-30 days
+    hl = signals['help_seeking_latency_days']
+    risk_contributions['help'] = clip(hl / 21, 0, 1)
+    
+    # 12. Feedback response rate: 0-1 (lower = ignores feedback = more risk)
+    risk_contributions['feedback'] = 1 - signals['feedback_response_rate']
+    
+    # Average of all risk contributions
+    avg_risk = sum(risk_contributions.values()) / len(risk_contributions)
+    
+    # Apply compression to map 0-1 to 0.02-0.75 with mid at 0.4
+    # This creates realistic probability spread
+    prob = 0.02 + 0.73 * np.tanh(3 * (avg_risk - 0.4))
+    
+    # Add noise to create realistic std dev
+    prob = clip(prob + np.random.normal(0, 0.09), 0.02, 0.85)
+    
+    return prob
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GENERATE ALL STUDENTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+print("  🎲 Generating student profiles...")
+
+profiles = generate_student_profiles(N_STUDENTS)
+
+full_profiles = []
+
+for i, signals in enumerate(profiles):
+    prob = signals.pop('_raw_probability')
+    true_risk = signals.pop('_true_risk')
+    true_risk_prob = signals.pop('_true_risk_prob')
+    
+    device_count = random.choices([1, 2], weights=[0.55, 0.45])[0]
+    monday_absence = random.choices([0, 1], weights=[0.78, 0.22])[0]
+    tired_freq = clip(int(np.random.normal(2.5, 1.5)), 0, 6)
+    whatsapp_silence = random.choices([0, 1], weights=[0.88, 0.12])[0]
+    
+    has_intervention = random.choices([0, 1], weights=[0.6, 0.4])[0]
     intervention_week = random.randint(2, 10) if has_intervention else 0
     intervention = intervention_type() if has_intervention else "none"
     
-    # ── Signal 1: Response Time Decay (hours) ───────────────────────────────
-    response_time_decay = noisy(48, 12, 24, 96)
-    
-    # ── Signal 2: Forum Passive-Active Ratio ────────────────────────────────
-    forum_passive_active_ratio = noisy(40, 10, 20, 80)
-    
-    # ── Signal 3: Login Pattern Fragmentation (0–1 score) ───────────────────
-    login_fragmentation_score = noisy(0.75, 0.10, 0.50, 1.0)
-    
-    # ── Signal 4: Resource Access Depth Shift (0=deep → 1=shallow) ──────────
-    resource_depth_shift = noisy(0.80, 0.10, 0.50, 1.0)
-    
-    # ── Signal 5: Collaborative Tool Drift (days since last group join) ──────
-    collaborative_tool_drift = noisy(18, 5, 7, 30, dtype=int)
-    
-    # ── Signal 6: Question Quality De-escalation (Bloom level 1–6) ──────────
-    question_quality_level = noisy(1.8, 0.5, 1.0, 3.0)
-    
-    # ── Signal 7: Peer Interaction Centrality Drop (0–1) ────────────────────
-    peer_centrality_score = noisy(0.15, 0.08, 0.0, 0.40)
-    
-    # ── Signal 8: Optional Activity Abandonment (% attended) ────────────────
-    optional_activity_rate = noisy(0.10, 0.05, 0.0, 0.25)
-    
-    # ── Signal 9: Submission Timing Rush Window (hours before deadline) ──────
-    submission_rush_hours = noisy(1.5, 1.0, 0.0, 5.0)
-    
-    # ── Signal 10: Silence Burst Episodes (count in past 30 days) ───────────
-    silence_burst_count = noisy(3.5, 1.0, 2, 7, dtype=int)
-    
-    # ── Signal 11: Help-Seeking Avoidance Gradient (days before asking help) ─
-    help_seeking_latency = noisy(12, 4, 5, 21, dtype=int)
-    
-    # ── Signal 12: Feedback Response Dampening (0=ignores, 1=responds) ──────
-    feedback_response_rate = noisy(0.15, 0.08, 0.0, 0.35)
-    
-    # ── Stress type modifiers ─────────────────────────────────────────────────
-    if stress_type == "academic_struggle":
-        login_fragmentation_score = clip(login_fragmentation_score - 0.15, 0.30, 0.80)
-        question_quality_level    = clip(question_quality_level - 0.3, 1.0, 2.5)
-        peer_centrality_score     = clip(peer_centrality_score - 0.05, 0.0, 0.30)
+    full_profiles.append({
+        "student_id": f"STU{str(i+1).zfill(4)}",
+        "age": random.randint(12, 18),
+        "gender": random.choice(["F", "M"]),
+        "is_first_gen_learner": random.choices([0, 1], weights=[0.5, 0.5])[0],
+        **signals,
+        "device_count": device_count,
+        "monday_absence_cluster": monday_absence,
+        "tired_keyword_freq": tired_freq,
+        "whatsapp_study_silence": whatsapp_silence,
+        "dropout_probability": prob,
+        "intervention_received": 1 if has_intervention else 0,
+        "intervention_week": intervention_week,
+        "intervention_type": intervention,
+        "intervention_effectiveness": intervention_effectiveness(intervention, intervention_week, 1),
+    })
+
+print(f"  ✅ Generated {len(full_profiles)} profiles")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ASSIGN DROPOUT LABELS
+# ══════════════════════════════════════════════════════════════════════════════
+
+print("\n  🏷️  Assigning probabilistic dropout labels...")
+
+# Pure probabilistic assignment
+for profile in full_profiles:
+    prob = profile['dropout_probability']
+    dropout_label = 1 if random.random() < prob else 0
+    profile['dropout_risk'] = dropout_label
+
+# Add label noise
+print(f"  🔀 Adding {LABEL_NOISE_RATE*100:.0f}% label noise...")
+noise_count = 0
+for profile in full_profiles:
+    if random.random() < LABEL_NOISE_RATE:
+        profile['dropout_risk'] = 1 - profile['dropout_risk']
+        noise_count += 1
+
+print(f"     Flipped {noise_count} labels")
+
+# Assign stress_type
+for profile in full_profiles:
+    if profile['dropout_risk'] == 1:
+        profile['stress_type'] = random.choice(['academic_struggle', 'home_financial_stress'])
     else:
-        login_fragmentation_score = clip(login_fragmentation_score + 0.10, 0.60, 1.0)
-        question_quality_level    = clip(question_quality_level + 0.4, 1.5, 4.0)
-        peer_centrality_score     = clip(peer_centrality_score + 0.10, 0.05, 0.50)
-    
-    # ── India-specific contextual features ────────────────────────────────────
-    device_count           = random.choices([1, 2], weights=[0.7, 0.3])[0]
-    monday_absence_cluster = random.choices([0, 1], weights=[0.3, 0.7])[0]
-    tired_keyword_freq     = noisy(4.2, 1.5, 1, 10, dtype=int)
-    whatsapp_study_silence = random.choices([0, 1], weights=[0.2, 0.8])[0]
-    
-    return {
-        # Identity
-        "student_id"                   : None,
-        "age"                          : random.randint(12, 18),
-        "gender"                       : random.choice(["F", "M"]),
-        "is_first_gen_learner"         : random.choices([0, 1], weights=[0.4, 0.6])[0],
-        
-        # 12 Micro-Signals
-        "response_time_decay_hrs"      : response_time_decay,
-        "forum_passive_active_ratio"   : forum_passive_active_ratio,
-        "login_fragmentation_score"    : login_fragmentation_score,
-        "resource_depth_shift"         : resource_depth_shift,
-        "collaborative_tool_drift_days": collaborative_tool_drift,
-        "question_quality_level"       : question_quality_level,
-        "peer_centrality_score"        : peer_centrality_score,
-        "optional_activity_rate"       : optional_activity_rate,
-        "submission_rush_hrs"          : submission_rush_hours,
-        "silence_burst_count"          : silence_burst_count,
-        "help_seeking_latency_days"    : help_seeking_latency,
-        "feedback_response_rate"       : feedback_response_rate,
-        
-        # India-specific contextual signals
-        "device_count"                 : device_count,
-        "monday_absence_cluster"       : monday_absence_cluster,
-        "tired_keyword_freq"           : tired_keyword_freq,
-        "whatsapp_study_silence"       : whatsapp_study_silence,
-        
-        # Intervention History
-        "intervention_received"        : 1 if has_intervention else 0,
-        "intervention_week"            : intervention_week,
-        "intervention_type"            : intervention,
-        "intervention_effectiveness"   : intervention_effectiveness(intervention, intervention_week, 1),
-        
-        # Labels
-        "stress_type"                  : stress_type,
-        "dropout_risk"                 : 1,
-    }
+        profile['stress_type'] = 'none'
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SIGNAL GENERATION — SAFE STUDENTS (dropout = 0)
+# CREATE DATAFRAME AND ANALYZE
 # ══════════════════════════════════════════════════════════════════════════════
 
-def generate_safe(student_id_num):
-    """Generate one safe (not at-risk) student record."""
-    
-    return {
-        # Identity
-        "student_id"                   : None,
-        "age"                          : random.randint(12, 18),
-        "gender"                       : random.choice(["F", "M"]),
-        "is_first_gen_learner"         : random.choices([0, 1], weights=[0.6, 0.4])[0],
-        
-        # 12 Micro-Signals (healthy ranges)
-        "response_time_decay_hrs"      : noisy(6, 3, 0.5, 18),
-        "forum_passive_active_ratio"   : noisy(6, 2, 2.0, 15),
-        "login_fragmentation_score"    : noisy(0.20, 0.08, 0.0, 0.45),
-        "resource_depth_shift"         : noisy(0.20, 0.08, 0.0, 0.45),
-        "collaborative_tool_drift_days": noisy(3, 1.5, 0, 7, dtype=int),
-        "question_quality_level"       : noisy(4.0, 0.8, 2.5, 6.0),
-        "peer_centrality_score"        : noisy(0.65, 0.12, 0.35, 1.0),
-        "optional_activity_rate"       : noisy(0.72, 0.12, 0.40, 1.0),
-        "submission_rush_hrs"          : noisy(22, 8, 6, 48),
-        "silence_burst_count"          : noisy(0.5, 0.5, 0, 2, dtype=int),
-        "help_seeking_latency_days"    : noisy(1.5, 0.8, 0, 4, dtype=int),
-        "feedback_response_rate"       : noisy(0.85, 0.08, 0.60, 1.0),
-        
-        # India-specific contextual signals
-        "device_count"                 : random.choices([1, 2], weights=[0.4, 0.6])[0],
-        "monday_absence_cluster"       : random.choices([0, 1], weights=[0.85, 0.15])[0],
-        "tired_keyword_freq"           : noisy(0.8, 0.5, 0, 3, dtype=int),
-        "whatsapp_study_silence"       : random.choices([0, 1], weights=[0.85, 0.15])[0],
-        
-        # Intervention History (minimal for safe students)
-        "intervention_received"        : 0,
-        "intervention_week"            : 0,
-        "intervention_type"            : "none",
-        "intervention_effectiveness"   : 0,
-        
-        # Labels
-        "stress_type"                  : "none",
-        "dropout_risk"                 : 0,
-    }
+df = pd.DataFrame(full_profiles)
+
+cols = ["student_id", "dropout_probability", "dropout_risk"] + \
+       [c for c in df.columns if c not in ["student_id", "dropout_probability", "dropout_risk"]]
+df = df[cols]
+
+prob_array = df['dropout_probability'].values
+
+print(f"\n  📊 Dropout Probability Distribution:")
+print(f"     Mean: {prob_array.mean():.4f}")
+print(f"     Std:  {prob_array.std():.4f}")
+print(f"     Min:  {prob_array.min():.4f}")
+print(f"     Max:  {prob_array.max():.4f}")
+print(f"     P25:  {np.percentile(prob_array, 25):.4f}")
+print(f"     P50:  {np.percentile(prob_array, 50):.4f}")
+print(f"     P75:  {np.percentile(prob_array, 75):.4f}")
+print(f"     P90:  {np.percentile(prob_array, 90):.4f}")
+
+ambiguous = prob_array[(prob_array >= 0.30) & (prob_array <= 0.70)]
+print(f"\n  🎯 Ambiguous Zone (30-70% probability): {len(ambiguous)} students ({len(ambiguous)/len(df)*100:.1f}%)")
+
+dropout_rate = df['dropout_risk'].mean() * 100
+print(f"\n  🏷️  Final dropout rate: {dropout_rate:.1f}%")
+
+static_path = "data/synthetic/students.csv"
+df.to_csv(static_path, index=False)
+print(f"\n  ✅ Static dataset saved → {static_path}")
+print(f"     Shape: {df.shape[0]} rows × {df.shape[1]} columns")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# UPGRADE 1: TEMPORAL DECAY SIMULATION
-# Shows how signals worsen over 12 weeks before dropout
+# TEMPORAL DECAY
 # ══════════════════════════════════════════════════════════════════════════════
 
 def add_temporal_decay(df, weeks=12):
-    """
-    Convert static signals into weekly time series.
-    At-risk students show signal decay over time.
-    Safe students remain stable or slightly improve.
-    """
-    print("  📈 Adding temporal decay simulation...")
+    print("\n  📈 Adding temporal decay simulation...")
     records = []
     
     for _, student in df.iterrows():
@@ -267,109 +355,61 @@ def add_temporal_decay(df, weeks=12):
             row['week'] = week
             
             if risk == 1:
-                # At-risk: signals worsen exponentially
-                decay_factor = (week / weeks) ** 1.5
+                decay_factor = (week / weeks) ** 1.2
                 
-                # Worsening signals
                 row['response_time_decay_hrs'] = min(
-                    student['response_time_decay_hrs'] * (1 + decay_factor * 0.8), 
-                    96
+                    student['response_time_decay_hrs'] * (1 + decay_factor * 0.5), 96
                 )
                 row['silence_burst_count'] = min(
-                    student['silence_burst_count'] + (week * 0.3), 
-                    10
-                )
-                row['help_seeking_latency_days'] = min(
-                    student['help_seeking_latency_days'] + (week * 0.5), 
-                    30
-                )
-                row['peer_centrality_score'] = max(
-                    student['peer_centrality_score'] * (1 - decay_factor * 0.6), 
-                    0
+                    student['silence_burst_count'] + (week * 0.25), 10
                 )
                 row['question_quality_level'] = max(
-                    student['question_quality_level'] * (1 - decay_factor * 0.4), 
-                    1
-                )
-                row['login_fragmentation_score'] = min(
-                    student['login_fragmentation_score'] + (decay_factor * 0.2), 
-                    1
+                    student['question_quality_level'] * (1 - decay_factor * 0.3), 1
                 )
                 row['optional_activity_rate'] = max(
-                    student['optional_activity_rate'] * (1 - decay_factor * 0.7), 
-                    0
+                    student['optional_activity_rate'] * (1 - decay_factor * 0.5), 0
                 )
                 
-                # Intervention effect (if intervention was received before this week)
                 if student['intervention_received'] == 1 and week >= student['intervention_week']:
-                    effectiveness = student['intervention_effectiveness']
-                    # Apply intervention effect: reduces signal severity
+                    eff = student['intervention_effectiveness']
                     row['response_time_decay_hrs'] = max(
-                        row['response_time_decay_hrs'] * (1 - effectiveness * 0.5),
+                        row['response_time_decay_hrs'] * (1 - eff * 0.4),
                         student['response_time_decay_hrs'] * 0.7
                     )
-                    row['silence_burst_count'] = max(
-                        row['silence_burst_count'] * (1 - effectiveness * 0.6),
-                        1
-                    )
-                    row['peer_centrality_score'] = min(
-                        row['peer_centrality_score'] + (effectiveness * 0.3),
-                        0.5
-                    )
             else:
-                # Safe: stable or slight improvement
-                improvement = 1 + (week / weeks) * 0.1
-                row['response_time_decay_hrs'] = max(
-                    student['response_time_decay_hrs'] * (1 - week * 0.02), 
-                    1
-                )
+                improvement = 1 + (week / weeks) * 0.05
                 row['question_quality_level'] = min(
-                    student['question_quality_level'] * improvement, 
-                    6
+                    student['question_quality_level'] * improvement, 6
                 )
-                row['peer_centrality_score'] = min(
-                    student['peer_centrality_score'] * improvement,
-                    1
+                row['response_time_decay_hrs'] = max(
+                    student['response_time_decay_hrs'] * (1 - week * 0.008), 1
                 )
             
             records.append(row)
     
     df_temporal = pd.DataFrame(records)
-    print(f"  ✅ Time series created: {df_temporal.shape[0]} rows × {df_temporal.shape[1]} columns")
+    print(f"  ✅ Time series created: {df_temporal.shape[0]} rows")
     return df_temporal
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# UPGRADE 2: EARLY WARNING LABELS (FIXED)
-# ══════════════════════════════════════════════════════════════════════════════
-
 def add_early_warning_labels(df_temporal):
-    """
-    Create training labels: At week X, does student drop out by week 12?
-    """
-    print("  🏷️ Adding early warning labels...")
+    print("  🏷️  Adding early warning labels...")
     
-    df_temporal['dropout_by_week12'] = df_temporal['dropout_risk']
     df_temporal['weeks_until_dropout'] = None
-    df_temporal['will_dropout_soon'] = 0  # Will drop out in next 4 weeks?
+    df_temporal['will_dropout_soon'] = 0
     
     for student_id in df_temporal['student_id'].unique():
         student_data = df_temporal[df_temporal['student_id'] == student_id]
         
         if student_data['dropout_risk'].iloc[0] == 1:
-            # At-risk student: dropout happens at week 12
-            dropout_week = 12
             for _, row in student_data.iterrows():
-                current_week = row['week']  # ← FIXED: moved inside loop
-                weeks_left = max(0, dropout_week - current_week)
-                mask = (df_temporal['student_id'] == student_id) & (df_temporal['week'] == current_week)
+                weeks_left = max(0, 12 - row['week'])
+                mask = (df_temporal['student_id'] == student_id) & (df_temporal['week'] == row['week'])
                 df_temporal.loc[mask, 'weeks_until_dropout'] = weeks_left
                 df_temporal.loc[mask, 'will_dropout_soon'] = 1 if weeks_left <= 4 else 0
         else:
-            # Safe student: never drops out
             for _, row in student_data.iterrows():
-                current_week = row['week']  # ← FIXED: added this line
-                mask = (df_temporal['student_id'] == student_id) & (df_temporal['week'] == current_week)
+                mask = (df_temporal['student_id'] == student_id) & (df_temporal['week'] == row['week'])
                 df_temporal.loc[mask, 'weeks_until_dropout'] = 99
                 df_temporal.loc[mask, 'will_dropout_soon'] = 0
     
@@ -377,135 +417,24 @@ def add_early_warning_labels(df_temporal):
     return df_temporal
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# BUILD STATIC DATASET
-# ══════════════════════════════════════════════════════════════════════════════
-
-records = []
-
-for i in range(N_DROPOUT):
-    records.append(generate_at_risk(i))
-
-for i in range(N_SAFE):
-    records.append(generate_safe(i + N_DROPOUT))
-
-# Shuffle
-random.shuffle(records)
-
-df = pd.DataFrame(records)
-
-# Assign student IDs
-df["student_id"] = [f"STU{str(i+1).zfill(4)}" for i in range(N_STUDENTS)]
-
-# Reorder columns — student_id first
-cols = ["student_id"] + [c for c in df.columns if c != "student_id"]
-df = df[cols]
-
-# Save static dataset
-static_path = "data/synthetic/students.csv"
-df.to_csv(static_path, index=False)
-print(f"\n  ✅ Static dataset saved → {static_path}")
-print(f"     Shape: {df.shape[0]} rows × {df.shape[1]} columns")
-
-# ══════════════════════════════════════════════════════════════════════════════
-# BUILD TEMPORAL DATASET (UPGRADE 1 + 2)
-# ══════════════════════════════════════════════════════════════════════════════
-
 df_temporal = add_temporal_decay(df, WEEKS)
 df_temporal = add_early_warning_labels(df_temporal)
 
-# Reorder columns for readability
-temporal_cols = ["student_id", "week"] + [c for c in df_temporal.columns if c not in ["student_id", "week"]]
-df_temporal = df_temporal[temporal_cols]
-
 temporal_path = "data/synthetic/students_timeseries.csv"
 df_temporal.to_csv(temporal_path, index=False)
-print(f"  ✅ Time series dataset saved → {temporal_path}")
-print(f"     Shape: {df_temporal.shape[0]} rows × {df_temporal.shape[1]} columns")
+print(f"\n  ✅ Time series dataset saved → {temporal_path}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# SUMMARY REPORT
-# ══════════════════════════════════════════════════════════════════════════════
-
-report_lines = []
-report_lines.append("=" * 70)
-report_lines.append("SahayakAI — Synthetic Dataset Summary (UPGRADED)")
-report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-report_lines.append("=" * 70)
-report_lines.append(f"Total students           : {len(df)}")
-report_lines.append(f"At-risk (1)              : {df['dropout_risk'].sum()}")
-report_lines.append(f"Safe (0)                 : {(df['dropout_risk'] == 0).sum()}")
-report_lines.append(f"Dropout rate             : {df['dropout_risk'].mean()*100:.1f}%")
-report_lines.append(f"Temporal window          : {WEEKS} weeks")
-report_lines.append(f"Time series rows         : {len(df_temporal)}")
-report_lines.append("")
-report_lines.append("Stress Type Breakdown (at-risk students):")
-at_risk = df[df["dropout_risk"] == 1]
-for stype, cnt in at_risk["stress_type"].value_counts().items():
-    report_lines.append(f"  {stype:<30}: {cnt}")
-report_lines.append("")
-report_lines.append("Intervention Coverage (at-risk students):")
-intervention_received = at_risk["intervention_received"].sum()
-report_lines.append(f"  Received intervention   : {intervention_received} ({intervention_received/len(at_risk)*100:.1f}%)")
-report_lines.append(f"  Avg effectiveness      : {at_risk['intervention_effectiveness'].mean():.2f}")
-report_lines.append("")
-report_lines.append("Signal Means — At-Risk vs Safe:")
-report_lines.append(f"  {'Signal':<40} {'At-Risk':>10} {'Safe':>10}")
-report_lines.append("  " + "-" * 62)
-
-signals = [
-    "response_time_decay_hrs",
-    "forum_passive_active_ratio",
-    "login_fragmentation_score",
-    "resource_depth_shift",
-    "collaborative_tool_drift_days",
-    "question_quality_level",
-    "peer_centrality_score",
-    "optional_activity_rate",
-    "submission_rush_hrs",
-    "silence_burst_count",
-    "help_seeking_latency_days",
-    "feedback_response_rate",
-]
-
-safe_df = df[df["dropout_risk"] == 0]
-for sig in signals:
-    at_mean   = at_risk[sig].mean()
-    safe_mean = safe_df[sig].mean()
-    report_lines.append(f"  {sig:<40} {at_mean:>10.2f} {safe_mean:>10.2f}")
-
-report_lines.append("")
-report_lines.append("India-Specific Signal Rates (at-risk vs safe):")
-india_signals = ["device_count", "monday_absence_cluster",
-                 "tired_keyword_freq", "whatsapp_study_silence"]
-for sig in india_signals:
-    at_val = at_risk[sig].mean()
-    safe_val = safe_df[sig].mean()
-    report_lines.append(f"  {sig:<40}: {at_val:.2f} (at-risk) | {safe_val:.2f} (safe)")
-
-report_lines.append("")
-report_lines.append("Early Warning Labels (Week 4 Snapshot):")
-week4 = df_temporal[df_temporal["week"] == 4]
-early_warning_count = week4[week4["will_dropout_soon"] == 1].shape[0]
-report_lines.append(f"  Students predicted to drop out soon at week 4: {early_warning_count}")
-report_lines.append(f"  (These are the students teachers should prioritize)")
-
-report_path = "data/synthetic/students_info.txt"
-with open(report_path, "w") as f:
-    f.write("\n".join(report_lines))
-
-for line in report_lines:
-    print(line)
-
-print(f"\n  ✅ Report saved → {report_path}")
 print("\n" + "=" * 70)
-print("  🎯 Day 2 Complete! Dataset ready for sklearn model (Day 3)")
+print("  🎯 Dataset Generation Complete!")
+print("")
+print("  ✅ KEY METRICS:")
+print(f"     • Probability range: {df['dropout_probability'].min():.3f} - {df['dropout_probability'].max():.3f}")
+print(f"     • Probability std: {df['dropout_probability'].std():.4f}")
+print(f"     • Students in ambiguous zone (30-70%): {len(ambiguous)} ({len(ambiguous)/len(df)*100:.1f}%)")
+print(f"     • Final dropout rate: {dropout_rate:.1f}%")
 print("")
 print("  📁 Files created:")
 print(f"     • {static_path}")
 print(f"     • {temporal_path}")
-print(f"     • {report_path}")
-print("")
-print("  🚀 Next: Train sklearn classifier on time series data")
 print("=" * 70)
