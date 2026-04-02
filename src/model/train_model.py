@@ -114,6 +114,14 @@ print(f"  Safe    : {(df_static['dropout_risk']==0).sum()} ({(1-df_static['dropo
 
 print("\n🔧 Engineering features...")
 
+# ── Drop leaking columns (prevent data leakage) ──────────────────────────────
+LEAKING_COLS = ["dropout_probability", "intervention_effectiveness",
+                "intervention_type", "intervention_week"]
+for col in LEAKING_COLS:
+    if col in df_static.columns:
+        df_static = df_static.drop(columns=[col])
+        print(f"  ℹ️  Dropped leaking column: {col}")
+
 SIGNAL_FEATURES = [
     "response_time_decay_hrs",
     "forum_passive_active_ratio",
@@ -146,10 +154,10 @@ ALL_FEATURES = SIGNAL_FEATURES + INDIA_FEATURES + DEMO_FEATURES + ["gender_encod
 if df_temporal is not None:
     print("  Adding temporal lag features (weeks 8-12)...")
     late_weeks   = df_temporal[df_temporal["week"] >= 8].copy()
-    temporal_agg = late_weeks.groupby("student_id")[SIGNAL_FEATURES].agg(["mean", "std"]).reset_index()
+    temporal_agg = late_weeks.groupby("student_id")[SIGNAL_FEATURES].agg(["mean"]).reset_index()
     temporal_agg.columns = (
         ["student_id"] +
-        [f"{col}_{stat}_last4w" for col in SIGNAL_FEATURES for stat in ["mean", "std"]]
+        [f"{col}_mean_last4w" for col in SIGNAL_FEATURES]
     )
     df_static    = df_static.merge(temporal_agg, on="student_id", how="left")
     temporal_cols = [c for c in df_static.columns if "last4w" in c]
@@ -333,7 +341,7 @@ cv_scores = cross_val_score(
     y_dropout_train_res,
     cv=skf,
     scoring=f2_custom,
-    n_jobs=-1
+    n_jobs=1
 )
 
 print(f"  F2-Score: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")

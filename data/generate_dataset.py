@@ -116,15 +116,15 @@ def generate_student_profiles(n_students):
         # BIMODAL DISTRIBUTION: 40% safe, 40% at-risk, 20% ambiguous
         mode_choice = random.random()
         
-        if mode_choice < 0.40:
+        if mode_choice < 0.35:
             # 40% clearly safe (Beta with small alpha, large beta)
-            true_risk_prob = np.random.beta(1.5, 6)
-        elif mode_choice < 0.80:
+            true_risk_prob = np.random.beta(2, 5)
+        elif mode_choice < 0.70:
             # 40% clearly at-risk (Beta with large alpha, small beta)
-            true_risk_prob = np.random.beta(5, 1.5)
+            true_risk_prob = np.random.beta(4, 2)
         else:
             # 20% ambiguous/uncertain (uniform in the middle)
-            true_risk_prob = np.random.uniform(0.3, 0.7)
+            true_risk_prob = np.random.uniform(0.25, 0.75)
         
         true_risk = true_risk_prob > 0.5
         
@@ -143,7 +143,7 @@ def generate_student_profiles(n_students):
             
             # DIFFERENT overlap based on confusion level
             confusion = 1 - abs(true_risk_prob - 0.5) * 2  # 0 = extreme, 1 = confused
-            overlap_std = (hi - lo) * 0.06 * confusion
+            overlap_std = (hi - lo) * 0.12 * (0.5 + confusion * 0.5)
             overlap_noise = np.random.normal(0, overlap_std)
             profile[signal] = clip(profile[signal] + overlap_noise, lo, hi)
         
@@ -223,10 +223,9 @@ def calculate_dropout_probability(signals):
     
     # Apply compression to map 0-1 to 0.02-0.75 with mid at 0.4
     # This creates realistic probability spread
-    prob = 0.02 + 0.73 * np.tanh(3 * (avg_risk - 0.4))
-    
+    prob = 0.04 + 0.65 * (1 / (1 + np.exp(-5 * (avg_risk - 0.58))))    
     # Add noise to create realistic std dev
-    prob = clip(prob + np.random.normal(0, 0.09), 0.02, 0.85)
+    prob = clip(prob + np.random.normal(0, 0.14), 0.03, 0.88)
     
     return prob
 
