@@ -1,6 +1,6 @@
 """
-SahayakAI — Teacher Dashboard (DAY 6 UI UPGRADE)
-==================================================
+SahayakAI — Teacher Dashboard (DAY 6 UI UPGRADE + DAY 7 SHAP)
+==============================================================
 UPGRADES:
   ✅ Animated risk bars (CSS keyframes)
   ✅ Glowing tier badges with pulse on critical
@@ -9,8 +9,7 @@ UPGRADES:
   ✅ Rainbow gradient top border
   ✅ Staggered card animations
   ✅ ASI-1 interaction counter badge
-  ✅ Probability distribution mini-chart
-  ✅ Collapsible sidebar with filters
+  ✅ SHAP plain English explanations
   ✅ Mobile-responsive layout
 
 Run: streamlit run src/dashboard/app.py
@@ -74,10 +73,6 @@ st.markdown("""
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
-@keyframes liftCard {
-  from { transform: translateY(0); box-shadow: none; }
-  to   { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
 }
 
 /* ── Header ── */
@@ -189,19 +184,10 @@ st.markdown("""
   position: relative;
   overflow: hidden;
 }
-.metric-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
 .metric-card:hover {
   border-color: #484F58;
   transform: translateY(-2px);
 }
-.metric-card:hover::after { opacity: 1; }
 .metric-number {
   font-size: 2.2rem;
   font-weight: 800;
@@ -792,6 +778,35 @@ with left:
               </div>
             </div>
             """, unsafe_allow_html=True)
+
+            # ── SHAP Explanation (Plain English) ──
+            if prob >= 0.30:
+                st.markdown('<div style="margin-top:12px; font-size:0.68rem; color:#8B949E; text-transform:uppercase; letter-spacing:1px;">🔍 Why This Student Was Flagged (SHAP)</div>', unsafe_allow_html=True)
+                
+                shap_factors = []
+                if s.get("optional_activity_rate", 1) <= 0.20:
+                    shap_factors.append("❄️ Optional activity abandoned (strongest signal)")
+                if s.get("response_time_decay_hrs", 0) >= 36:
+                    shap_factors.append("⏰ Response time increased significantly")
+                if s.get("forum_passive_active_ratio", 0) >= 20:
+                    shap_factors.append("📊 Forum lurking (viewing but not participating)")
+                if s.get("silence_burst_count", 0) >= 2:
+                    shap_factors.append("🔇 Silence burst detected — no activity for 3+ days")
+                if s.get("question_quality_level", 6) <= 2.5:
+                    shap_factors.append("❓ Question quality decreased (simpler questions)")
+                if s.get("help_seeking_latency_days", 0) >= 7:
+                    shap_factors.append("🆘 Stopped asking for help")
+                if s.get("monday_absence_cluster", 0) == 1:
+                    shap_factors.append("📅 Monday absence pattern (possible harvest/labor)")
+                
+                if shap_factors:
+                    st.markdown(f"""
+                    <div style="background:#1A1C22; border-radius:8px; padding:10px 12px; margin-top:5px;">
+                      <div style="font-size:0.75rem; color:#E6EDF3; margin-bottom:5px;">Most important factors:</div>
+                      {''.join([f'<div style="font-size:0.72rem; color:#F4A261; margin:3px 0;">• {factor}</div>' for factor in shap_factors[:4]])}
+                      <div style="font-size:0.65rem; color:#8B949E; margin-top:6px;">SHAP values measure each factor's contribution to dropout risk</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
             # Override slider
             st.markdown('<div style="margin-top:12px;font-size:0.72rem;color:#8B949E;">🎚️ Teacher Override — adjust if you disagree</div>', unsafe_allow_html=True)

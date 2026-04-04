@@ -561,6 +561,85 @@ plt.savefig(pr_path, dpi=150, bbox_inches="tight", facecolor="#0D1117")
 plt.close()
 print(f"  ✅ {pr_path}")
 
+# ══════════════════════════════════════════════════════════════════════════════
+# 10.5. SHAP EXPLAINABILITY (ASI-1 recommended)
+# ══════════════════════════════════════════════════════════════════════════════
+
+print("\n🔮 Generating SHAP explanations...")
+
+try:
+    import shap
+    SHAP_AVAILABLE = True
+    print("  ✅ SHAP library loaded")
+except ImportError:
+    SHAP_AVAILABLE = False
+    print("  ⚠️  SHAP not installed. Run: pip install shap")
+
+if SHAP_AVAILABLE and USE_XGB:
+    # Create explainer
+    explainer = shap.TreeExplainer(dropout_model)
+    
+    # Take sample for SHAP (first 100 test samples to be fast)
+    X_sample = X_test[:100]
+    shap_values = explainer.shap_values(X_sample)
+    
+    # 1. Summary plot (beeswarm)
+    fig, ax = plt.subplots(figsize=(14, 8))
+    fig.patch.set_facecolor("#0D1117")
+    shap.summary_plot(shap_values, X_sample, feature_names=ALL_FEATURES, 
+                      show=False, max_display=15, plot_size=(14, 8))
+    plt.title("SHAP Feature Importance — Top 15 Features", 
+              color="white", fontsize=13, fontweight="bold")
+    plt.tight_layout()
+    shap_summary_path = "models/plots/shap_summary.png"
+    plt.savefig(shap_summary_path, dpi=150, bbox_inches="tight", facecolor="#0D1117")
+    plt.close()
+    print(f"  ✅ SHAP summary plot saved to {shap_summary_path}")
+    
+    # 2. Bar plot (mean absolute SHAP)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    fig.patch.set_facecolor("#0D1117")
+    shap.summary_plot(shap_values, X_sample, feature_names=ALL_FEATURES,
+                      plot_type="bar", show=False, max_display=15)
+    plt.title("SHAP Mean Absolute Feature Importance", 
+              color="white", fontsize=13, fontweight="bold")
+    plt.tight_layout()
+    shap_bar_path = "models/plots/shap_bar.png"
+    plt.savefig(shap_bar_path, dpi=150, bbox_inches="tight", facecolor="#0D1117")
+    plt.close()
+    print(f"  ✅ SHAP bar plot saved to {shap_bar_path}")
+    
+    # 3. Waterfall plot for first at-risk student in test set
+    at_risk_indices = np.where(y_dropout_test == 1)[0]
+    if len(at_risk_indices) > 0:
+        idx = at_risk_indices[0]
+        fig, ax = plt.subplots(figsize=(12, 10))
+        fig.patch.set_facecolor("#0D1117")
+        shap.waterfall_plot(shap.Explanation(values=shap_values[idx],
+                              base_values=explainer.expected_value,
+                              data=X_sample[idx],
+                              feature_names=ALL_FEATURES),
+                            show=False, max_display=10)
+        plt.title("SHAP Waterfall Plot — At-Risk Student (Priya)", 
+                  color="white", fontsize=13, fontweight="bold")
+        plt.tight_layout()
+        shap_waterfall_path = "models/plots/shap_waterfall.png"
+        plt.savefig(shap_waterfall_path, dpi=150, bbox_inches="tight", facecolor="#0D1117")
+        plt.close()
+        print(f"  ✅ SHAP waterfall plot saved to {shap_waterfall_path}")
+    
+    # 4. Save SHAP values for dashboard
+    shap_dict = {
+        "feature_names": ALL_FEATURES,
+        "top_5_features": [ALL_FEATURES[i] for i in np.argsort(np.abs(shap_values).mean(0))[-5:][::-1]],
+        "top_5_importance": [float(np.abs(shap_values).mean(0)[i]) for i in np.argsort(np.abs(shap_values).mean(0))[-5:][::-1]]
+    }
+    with open("models/shap_summary.json", "w") as f:
+        json.dump(shap_dict, f, indent=2)
+    print("  ✅ SHAP summary saved to models/shap_summary.json")
+else:
+    print("  ⚠️  SHAP not available — skipping explainability plots")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 11. GENERATE TIER 2 WHATSAPP TEMPLATES
